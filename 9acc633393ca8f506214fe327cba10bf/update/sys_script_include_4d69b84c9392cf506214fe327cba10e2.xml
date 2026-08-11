@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.DHAPIConfig</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>DHAPIConfig</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[class DHAPIConfig {
+  /**
+   * @typedef {Object}
+   * Map of Nexthink headers and Metric record field names.
+   */
+  static DEVICEMETRICMAP = {
+    "device.name":"device_name",
+    "device.collector.uid": "uid",
+    "device.average_boot_duration_7d.rating":"average_boot_duration_7d",
+    "device.boot.days_since_last_full_boot.rating":"days_since_last_full_boot",
+    "device.average_time_until_desktop_is_ready_7d.rating":"average_time_until_desktop_is_ready_7d",
+    "device.average_time_until_desktop_is_visible_7d.rating":"average_time_until_desktop_is_visible_7d",
+    "device.average_wifi_signal_strength_24h.rating":"average_wifi_signal_strength_24h",
+    "device.average_cpu_usage_24h.rating": "average_cpu_usage_24h",
+    "device.average_memory_usage_24h.rating": "average_memory_usage_24h",
+    "device.last_system_drive_free_space.rating": "last_system_drive_free_space",
+    "device.number_of_hard_resets_7d.rating": "number_of_hard_resets_7d",
+    "device.number_of_system_crashes_7d.rating": "number_of_system_crashes_7d"
+  };
+
+  static NXT_DEXSCORESQRYID = "#service_now_scorecard_dex_score_per_day";
+  static NXT_DEVICEMETRICQRYID = "#service_now_scorecard_device_metrics";
+
+  /**
+   * Function which will return the UPN required by Nexthink, this can be
+   * modified if required to identify the user UPN in Nexthink.
+   * @param {string} field - Name of field on sys_user record
+   * @returns string
+   */
+  static NXT_UPN(field) {
+
+    field = field || 'email'
+    const user = new global.GlideQuery('sys_user')
+    .get(gs.getUserID(), [field])
+    .orElse(null);
+
+    if(!user || !user[field]) throw new Error(`User found does not have a value for: ${field}`)
+
+    return user[field]
+  }
+
+  /**
+   * @typedef {Array<string>} - Fields the widget needs for Device Metrics
+   *
+   */
+  static CACHEPAYLOAD = ["overall_score", "actions", "ra_run_today","asset.sys_id", "asset.model$DISPLAY"];
+
+  /**
+   * Getter function to ensure the widget receives the correct fields from the API/Cache
+   */
+  static get cache_fields() {
+    var maps_fields = Object.values(this.DEVICEMETRICMAP);
+
+    return maps_fields.concat(this.CACHEPAYLOAD);
+  }
+
+  static DEXSCOREMAP = {
+    start_time: "date",
+    score: "dex_score",
+  };
+
+  static get metric_map() {
+    return this.DEVICEMETRICMAP;
+  }
+
+  static get dex_map() {
+    return this.DEXSCOREMAP;
+  }
+
+}
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:19</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>4d69b84c9392cf506214fe327cba10e2</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>DHAPIConfig</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_4d69b84c9392cf506214fe327cba10e2</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-21 12:56:45</sys_updated_on>
+    </sys_script_include>
+</record_update>

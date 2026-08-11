@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.MGI</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>MGI</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var MGI = Class.create();
+
+/**
+ * Provides the Eco Score response. This method must return a score key in the response:
+ *  const writer = response.getStreamWriter();
+ *  writer.writeString(JSON.stringify({ score: eco_score }));
+ *
+ * @param {sn_ws_int.RESTAPIRequest} request - The incoming REST API request object.
+ * @param {sn_ws_int.RESTAPIResponse} response - The outgoing REST API response object used to send data back to the client.
+ *
+ * @returns {void}
+ */
+MGI.provideEcoScore = function(request, response) {
+    var metric = "total_energy_consumption";
+
+    //calculate score based on diff between location average and your metrics
+    // Energy Score = 1 / (device total/country total) + 1
+    // eco = energy
+
+    const dh = new DeviceHealth();
+    const user = dh.getUser();
+    const devices = user.getDeviceValues("ECO");
+    const country_avg = parseFloat(
+        user.getCountryValues("ECO").values.total_energy_consumption,
+    );
+
+    if (!country_avg) return 0;
+
+    const device_scores = [];
+
+    //for each device calculate the diff between
+    devices
+        .filter((d) => d.values[metric])
+        .forEach((device) => {
+            const device_total = parseFloat(device.values[metric]);
+            const score = 100 / (1 + device_total / country_avg);
+
+            device_scores.push(Math.round(score));
+        });
+
+    eco_score =
+        device_scores.reduce((sum, current) => sum + current, 0) /
+        device_scores.length;
+
+    response.setContentType("application/json");
+    response.setStatus(200);
+
+    const writer = response.getStreamWriter();
+    writer.writeString(JSON.stringify({
+        score: eco_score
+    }));
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-27 09:52:07</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>c717c41e935283106214fe327cba10dd</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>MGI</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_c717c41e935283106214fe327cba10dd</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-27 14:17:53</sys_updated_on>
+    </sys_script_include>
+</record_update>

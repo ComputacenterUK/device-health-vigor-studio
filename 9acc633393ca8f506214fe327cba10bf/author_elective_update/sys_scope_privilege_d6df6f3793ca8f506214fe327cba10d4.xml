@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_scope_privilege">
+    <sys_scope_privilege action="DELETE">
+        <operation>execute</operation>
+        <source_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</source_scope>
+        <status>allowed</status>
+        <sys_class_name>sys_scope_privilege</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 08:23:00</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>d6df6f3793ca8f506214fe327cba10d4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>hnCopyRecs</sys_name>
+        <sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_scope_privilege_d6df6f3793ca8f506214fe327cba10d4</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-20 08:23:00</sys_updated_on>
+        <target_name>hnCopyRecs</target_name>
+        <target_scope display_value="Global">global</target_scope>
+        <target_type>sys_script_include</target_type>
+    </sys_scope_privilege>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</application>
+        <file_path/>
+        <instance_id>98cabcee4fc252807b9b220f0310c751</instance_id>
+        <instance_name>ven01619</instance_name>
+        <name>sys_scope_privilege_d6df6f3793ca8f506214fe327cba10d4</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_scope_privilege"><sys_scope_privilege action="INSERT_OR_UPDATE"><operation>execute</operation><source_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</source_scope><status>allowed</status><sys_class_name>sys_scope_privilege</sys_class_name><sys_created_by>peter.watt</sys_created_by><sys_created_on>2026-07-20 08:23:00</sys_created_on><sys_customer_update>false</sys_customer_update><sys_id>d6df6f3793ca8f506214fe327cba10d4</sys_id><sys_mod_count>0</sys_mod_count><sys_name>hnCopyRecs</sys_name><sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope><sys_update_name>sys_scope_privilege_d6df6f3793ca8f506214fe327cba10d4</sys_update_name><sys_updated_by>peter.watt</sys_updated_by><sys_updated_on>2026-07-20 08:23:00</sys_updated_on><target_name>hnCopyRecs</target_name><target_scope display_value="Global">global</target_scope><target_type>sys_script_include</target_type></sys_scope_privilege></record_update>]]></payload>
+        <payload_hash>1903784826</payload_hash>
+        <record_name>hnCopyRecs</record_name>
+        <reverted_from/>
+        <source>52cc633393ca8f506214fe327cba10c8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 08:23:00</sys_created_on>
+        <sys_id>5adfe37793ca8f506214fe327cba1071</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19f7e9f0c830000001</sys_recorded_at>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-20 08:23:00</sys_updated_on>
+        <type>Cross scope privilege</type>
+        <update_guid>1adfe377d8ca8f50d20e021dd5ee7e70</update_guid>
+        <update_guid_history>1adfe377d8ca8f50d20e021dd5ee7e70:1903784826</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-08-11 13:43:37</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_db_object display_value="" name="sys_scope_privilege">sys_scope_privilege</sys_db_object>
+        <sys_id>6041ae6546ed431b90d84c9c37a883b9</sys_id>
+        <sys_metadata>d6df6f3793ca8f506214fe327cba10d4</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>hnCopyRecs</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope_delete display_value="">e547d1fba4c442beaaff218a21fdaf04</sys_scope_delete>
+        <sys_update_name>sys_scope_privilege_d6df6f3793ca8f506214fe327cba10d4</sys_update_name>
+        <sys_update_version display_value="sys_scope_privilege_d6df6f3793ca8f506214fe327cba10d4">5adfe37793ca8f506214fe327cba1071</sys_update_version>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-08-11 13:43:37</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

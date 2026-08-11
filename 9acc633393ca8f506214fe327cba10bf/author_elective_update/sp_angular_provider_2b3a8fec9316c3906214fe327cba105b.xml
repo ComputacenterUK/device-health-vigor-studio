@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_angular_provider">
+    <sp_angular_provider action="DELETE">
+        <name>DHAPIService</name>
+        <script><![CDATA[function DHAPIService(DHApi, DHDevice) {
+	const api = DHApi("v2");
+	const state = {
+		dex_score: null,
+		selectedAsset: null,
+		assetsLoading: null,
+		assetDetails: null,
+	};
+
+	Object.seal(state);
+
+	this.state = state;
+
+	this.setSelectedAsset = function (assetID) {
+		state.selectedAsset = assetID;
+	};
+
+	this.getSelectedAssetInfo = function () {
+
+		if(!state.selectedAsset || !state.assetDetails) return null;
+
+		return state.assetDetails[state.selectedAsset] || null;
+	};
+
+	/**
+   * Retrieve the DEX scores for a user
+   * @returns {Promise}
+   */
+	this.getDexScores = async function getDexScores() {
+		if (state.dex_score) return state.dex_score;
+
+		return state.dex_score = await api.getDexScores();
+	};
+
+	/**
+   * @param {array} devices - array of objects with CI name and related asset sys ID
+   */
+	this.getMetrics = async function getMetrics() {
+		console.time("getMetrics");
+		state.assetsLoading = true;
+		state.assetDetails = null;
+
+		let assetMap = {};
+		let firstAsset = null;
+
+		try {
+			const r = await api.getDeviceMetrics();
+
+			r.data.data.forEach((deviceData) => {
+				//created Devices
+				const device = new DHDevice(deviceData);
+				assetMap[deviceData.asset_id] = device
+
+				if (!deviceData.error && !firstAsset) firstAsset = deviceData.asset_id;
+
+				// Extract values once
+				const statuses = device.metrics
+				.filter(m => m.category === "Performance")
+				.map(m => m.value);
+
+				// Determine score based on precedence
+				let score = "good";
+				if (statuses.includes("poor")) {
+					score = "poor";
+				} else if (statuses.includes("average")) {
+					score = "average";
+				}
+
+				device.update({ "overall_score": score });
+			});
+
+			const asset_ids = Object.keys(assetMap);
+
+			state.selectedAsset = firstAsset || asset_ids[0] || null;
+			state.assetDetails = assetMap;
+			state.assetsLoading = false;
+		} catch (err) {
+			console.error(err);
+		}
+
+		return state.assetDetails;
+	};
+
+	/**
+   * Retrieve the DEX scores for a user
+   * @returns {Promise}
+   */
+	this.getDexScores = async function getDexScores() {
+		if (state.dex_score) return state.dex_score;
+
+		state.dex_score = await api.getDexScores();
+
+		return state.dex_score;
+	};
+
+	/**
+   * @param {array} scores - array of objects with dates
+   * @param {bool} desc - sort descending?
+   */
+	this.sortScoresByDate = function sortScoresByDate(scores, desc) {
+		return scores.sort((a, b) => {
+			// Parse the date strings into Date objects
+			let dateA = new Date(a.date);
+			let dateB = new Date(b.date);
+
+			// Compare the Date objects
+			return desc ? dateB - dateA : dateA - dateB;
+		});
+	};
+}
+]]></script>
+        <sys_class_name>sp_angular_provider</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 13:48:29</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>2b3a8fec9316c3906214fe327cba105b</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>DHAPIService</sys_name>
+        <sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_angular_provider_2b3a8fec9316c3906214fe327cba105b</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 14:17:59</sys_updated_on>
+        <type>service</type>
+    </sp_angular_provider>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</application>
+        <file_path/>
+        <instance_id>98cabcee4fc252807b9b220f0310c751</instance_id>
+        <instance_name>ven01619</instance_name>
+        <name>sp_angular_provider_2b3a8fec9316c3906214fe327cba105b</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_angular_provider"&gt;&lt;sp_angular_provider action="INSERT_OR_UPDATE"&gt;&lt;name&gt;DHAPIService&lt;/name&gt;&lt;script&gt;&lt;![CDATA[function DHAPIService(DHApi, DHDevice) {
+	const api = DHApi("v2");
+	const state = {
+		dex_score: null,
+		selectedAsset: null,
+		assetsLoading: null,
+		assetDetails: null,
+	};
+
+	Object.seal(state);
+
+	this.state = state;
+
+	this.setSelectedAsset = function (assetID) {
+		state.selectedAsset = assetID;
+	};
+
+	this.getSelectedAssetInfo = function () {
+
+		if(!state.selectedAsset || !state.assetDetails) return null;
+
+		return state.assetDetails[state.selectedAsset] || null;
+	};
+
+	/**
+   * Retrieve the DEX scores for a user
+   * @returns {Promise}
+   */
+	this.getDexScores = async function getDexScores() {
+		if (state.dex_score) return state.dex_score;
+
+		return state.dex_score = await api.getDexScores();
+	};
+
+	/**
+   * @param {array} devices - array of objects with CI name and related asset sys ID
+   */
+	this.getMetrics = async function getMetrics() {
+		console.time("getMetrics");
+		state.assetsLoading = true;
+		state.assetDetails = null;
+
+		let assetMap = {};
+		let firstAsset = null;
+
+		try {
+			const r = await api.getDeviceMetrics();
+
+			r.data.data.forEach((deviceData) =&gt; {
+				//created Devices
+				const device = new DHDevice(deviceData);
+				assetMap[deviceData.asset_id] = device
+
+				if (!deviceData.error &amp;&amp; !firstAsset) firstAsset = deviceData.asset_id;
+
+				// Extract values once
+				const statuses = device.metrics
+				.filter(m =&gt; m.category === "Performance")
+				.map(m =&gt; m.value);
+
+				// Determine score based on precedence
+				let score = "good";
+				if (statuses.includes("poor")) {
+					score = "poor";
+				} else if (statuses.includes("average")) {
+					score = "average";
+				}
+
+				device.update({ "overall_score": score });
+			});
+
+			const asset_ids = Object.keys(assetMap);
+
+			state.selectedAsset = firstAsset || asset_ids[0] || null;
+			state.assetDetails = assetMap;
+			state.assetsLoading = false;
+		} catch (err) {
+			console.error(err);
+		}
+
+		return state.assetDetails;
+	};
+
+	/**
+   * Retrieve the DEX scores for a user
+   * @returns {Promise}
+   */
+	this.getDexScores = async function getDexScores() {
+		if (state.dex_score) return state.dex_score;
+
+		state.dex_score = await api.getDexScores();
+
+		return state.dex_score;
+	};
+
+	/**
+   * @param {array} scores - array of objects with dates
+   * @param {bool} desc - sort descending?
+   */
+	this.sortScoresByDate = function sortScoresByDate(scores, desc) {
+		return scores.sort((a, b) =&gt; {
+			// Parse the date strings into Date objects
+			let dateA = new Date(a.date);
+			let dateB = new Date(b.date);
+
+			// Compare the Date objects
+			return desc ? dateB - dateA : dateA - dateB;
+		});
+	};
+}
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sp_angular_provider&lt;/sys_class_name&gt;&lt;sys_created_by&gt;peter.watt&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-22 13:48:29&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;false&lt;/sys_customer_update&gt;&lt;sys_id&gt;2b3a8fec9316c3906214fe327cba105b&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;DHAPIService&lt;/sys_name&gt;&lt;sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh"&gt;9acc633393ca8f506214fe327cba10bf&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="Actionable Eco Device Health"&gt;9acc633393ca8f506214fe327cba10bf&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_angular_provider_2b3a8fec9316c3906214fe327cba105b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;peter.watt&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-22 14:17:59&lt;/sys_updated_on&gt;&lt;type&gt;service&lt;/type&gt;&lt;/sp_angular_provider&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>-1519127063</payload_hash>
+        <record_name>DHAPIService</record_name>
+        <reverted_from/>
+        <source>52cc633393ca8f506214fe327cba10c8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 14:17:59</sys_created_on>
+        <sys_id>3d445fec9356c3906214fe327cba10cb</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19f8a30c5760000001</sys_recorded_at>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 14:17:59</sys_updated_on>
+        <type>Widget Angular Provider</type>
+        <update_guid>bd445fecd356c3905011366880abd9ca</update_guid>
+        <update_guid_history>bd445fecd356c3905011366880abd9ca:-1519127063,50ad87641b56c390a5c99d9c0c9e0627:-676028931,698d03640256c3903b5d9e2b85246098:-720415984</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Record deleted 2026-07-22 16:14:50">a241a3a493d6c3906214fe327cba1088</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 15:14:50</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_db_object display_value="" name="sp_angular_provider">sp_angular_provider</sys_db_object>
+        <sys_id>718651132e7f4e16900f8d6615d22504</sys_id>
+        <sys_metadata>2b3a8fec9316c3906214fe327cba105b</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DHAPIService</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope_delete display_value="">e547d1fba4c442beaaff218a21fdaf04</sys_scope_delete>
+        <sys_update_name>sp_angular_provider_2b3a8fec9316c3906214fe327cba105b</sys_update_name>
+        <sys_update_version display_value="sp_angular_provider_2b3a8fec9316c3906214fe327cba105b">3d445fec9356c3906214fe327cba10cb</sys_update_version>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 15:14:50</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

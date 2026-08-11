@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="258bcc40939e8f506214fe327cba10ad" label="Action" max_length="40" name="x_mukl_dh_actions" type="collection">
+        <element attributes="edge_encryption_enabled=true" label="Action ID" max_length="255" name="action_id" type="string"/>
+        <element default="x_mukl_dh_metric_cache" label="Condition table" max_length="80" name="condition_table" type="table_name"/>
+        <element label="Action text" max_length="40" name="action_text" type="string"/>
+        <element label="Short description" max_length="200" name="short_description" type="string"/>
+        <element label="Page link" max_length="32" name="page_link" reference="sp_page" type="reference"/>
+        <element default="true" label="Active" max_length="40" name="active" type="boolean"/>
+        <element label="URL" max_length="1024" name="url" type="url"/>
+        <element label="Parameters" max_length="4000" name="parameters" type="simple_name_values"/>
+        <element attributes="client_script=true" default="(function(){&#13;&#10;&#13;&#10;&#9;/* &#13;&#10;&#9;* Add client side (browser) code here to perform actions &#13;&#10;&#9;* e.g. &#13;&#10;&#9;* console.log(&quot;running action&quot;);&#13;&#10;&#9;*/&#13;&#10;&#13;&#10;})();" label="Client script" max_length="8000" name="script" type="script"/>
+        <element attributes="condition_builder=v2" dependent="condition_table" dependent_on_field="condition_table" label="Condition" max_length="4000" name="condition" type="conditions" use_dependent_field="true"/>
+        <element default="(function(action, metric, asset) {&#13;&#10;&#9;/*&#13;&#10;&#9; * action: GlideRecord of the 'Action' [x_mukl_dh_actions]&#13;&#10;&#9; * metric: GlideRecord of the 'Metric Cache' [x_mukl_dh_metric_cache]&#13;&#10;&#9; * asset:  GlideRecord of the 'Asset' [alm_asset]&#13;&#10;&#9; */&#13;&#10;&#13;&#10;    try {&#13;&#10;&#9;&#9;/*&#13;&#10;&#9;&#9; * &lt;-- SCRIPT LOGIC GOES HERE --&gt;&#13;&#10;&#9;&#9; * &#13;&#10;&#9;&#9; * SCRIPT OUTCOME (Global variables):&#13;&#10;&#9;&#9; * answer: (Default: true) Set to false (boolean) if the script logic fails.&#13;&#10;&#9;&#9; * message: (Default: null) Set to a success or error string.&#13;&#10;&#9;&#9; */&#13;&#10;&#9;} catch (e) {&#13;&#10;&#9;&#9;answer = false;&#13;&#10;&#9;&#9;message = e.message;&#13;&#10;&#9;}&#13;&#10;&#13;&#10;})(action, metric, asset);" label="Server script" max_length="8000" name="server_script" type="script"/>
+        <element choice="3" default="performance" label="Category" max_length="40" name="category" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Eco" value="ECO"/>
+                <element inactive_on_update="false" label="Performance" value="performance"/>
+            </choice>
+        </element>
+        <element choice="1" label="Type" max_length="40" name="type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Server Script" sequence="400" value="server_script"/>
+                <element inactive_on_update="false" label="Page" sequence="0" value="page"/>
+                <element inactive_on_update="false" label="Client Script" sequence="300" value="client_script"/>
+                <element inactive_on_update="false" label="URL" sequence="1" value="url"/>
+                <element inactive_on_update="false" label="Remote Action" sequence="2" value="remote_action"/>
+                <element inactive="true" inactive_on_update="true" label="Advanced" sequence="500" value="advanced"/>
+            </choice>
+        </element>
+        <element display="true" label="Title" max_length="40" name="title" type="string"/>
+        <element label="AI guidance" max_length="1000" name="ai_guidance" type="string"/>
+        <index name="index">
+            <element name="page_link"/>
+        </index>
+    </element>
+</database>

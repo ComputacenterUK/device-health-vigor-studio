@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn">
+    <sys_rest_message_fn action="DELETE">
+        <authentication_type>inherit_from_parent</authentication_type>
+        <basic_auth_password/>
+        <basic_auth_profile/>
+        <basic_auth_user/>
+        <content/>
+        <function_name>Default GET</function_name>
+        <http_method>get</http_method>
+        <lock>false</lock>
+        <oauth2_profile/>
+        <protocol_name/>
+        <qualified_name>DH Nexthink [ Default GET ]</qualified_name>
+        <rest_endpoint>https://{company_id}.api.{region}.nexthink.cloud/api/</rest_endpoint>
+        <rest_message display_value="DH Nexthink">20aa5d1c93de03906214fe327cba10ed</rest_message>
+        <sys_class_name>sys_rest_message_fn</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-21 10:48:58</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>9ada155c93de03906214fe327cba10a0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Default GET</sys_name>
+        <sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_rest_message_fn_9ada155c93de03906214fe327cba10a0</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-21 10:48:58</sys_updated_on>
+        <use_auth_mid_server/>
+        <use_basic_auth>false</use_basic_auth>
+        <use_mid_server/>
+        <use_mutual_auth>false</use_mutual_auth>
+    </sys_rest_message_fn>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</application>
+        <file_path/>
+        <instance_id>98cabcee4fc252807b9b220f0310c751</instance_id>
+        <instance_name>ven01619</instance_name>
+        <name>sys_rest_message_fn_9ada155c93de03906214fe327cba10a0</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn"><sys_rest_message_fn action="INSERT_OR_UPDATE"><authentication_type>inherit_from_parent</authentication_type><basic_auth_password/><basic_auth_profile/><basic_auth_user/><content/><function_name>Default GET</function_name><http_method>get</http_method><lock>false</lock><oauth2_profile/><protocol_name/><qualified_name>DH Nexthink [ Default GET ]</qualified_name><rest_endpoint>https://{company_id}.api.{region}.nexthink.cloud/api/</rest_endpoint><rest_message display_value="DH Nexthink">20aa5d1c93de03906214fe327cba10ed</rest_message><sys_class_name>sys_rest_message_fn</sys_class_name><sys_created_by>peter.watt</sys_created_by><sys_created_on>2026-07-21 10:48:58</sys_created_on><sys_customer_update>false</sys_customer_update><sys_id>9ada155c93de03906214fe327cba10a0</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Default GET</sys_name><sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope><sys_update_name>sys_rest_message_fn_9ada155c93de03906214fe327cba10a0</sys_update_name><sys_updated_by>peter.watt</sys_updated_by><sys_updated_on>2026-07-21 10:48:58</sys_updated_on><use_auth_mid_server/><use_basic_auth>false</use_basic_auth><use_mid_server/><use_mutual_auth>false</use_mutual_auth></sys_rest_message_fn></record_update>]]></payload>
+        <payload_hash>1600882436</payload_hash>
+        <record_name>Default GET</record_name>
+        <reverted_from/>
+        <source>52cc633393ca8f506214fe327cba10c8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-21 10:48:58</sys_created_on>
+        <sys_id>d2da155c93de03906214fe327cba10a4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19f844b0cad0000001</sys_recorded_at>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-21 10:48:58</sys_updated_on>
+        <type>HTTP Method</type>
+        <update_guid>d2da155cf4de0390667d94b6c52962a3</update_guid>
+        <update_guid_history>d2da155cf4de0390667d94b6c52962a3:1600882436</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-21 10:55:26</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_db_object display_value="" name="sys_rest_message_fn">sys_rest_message_fn</sys_db_object>
+        <sys_id>285d64be11b6497889a5425e730a1344</sys_id>
+        <sys_metadata>9ada155c93de03906214fe327cba10a0</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Default GET</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_parent display_value="DH Nexthink">20aa5d1c93de03906214fe327cba10ed</sys_parent>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope_delete display_value="">e547d1fba4c442beaaff218a21fdaf04</sys_scope_delete>
+        <sys_update_name>sys_rest_message_fn_9ada155c93de03906214fe327cba10a0</sys_update_name>
+        <sys_update_version display_value="sys_rest_message_fn_9ada155c93de03906214fe327cba10a0">d2da155c93de03906214fe327cba10a4</sys_update_version>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-21 10:55:26</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

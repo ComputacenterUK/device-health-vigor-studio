@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.dhUser</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Class representing a user for Device Health</description>
+        <mobile_callable>false</mobile_callable>
+        <name>dhUser</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var dhUser = function dhUser(user_id) {
+	
+	this.related_table = this.entity.getRelatedTable();
+	
+	if ( user_id && gs.hasRole('admin') ) {
+		this.related_id = user_id;
+	} else {
+		this.related_id = gs.getUserID();
+	}
+	
+};
+
+dhUser.prototype = {
+	
+	TN_CONFIG : 'x_mukl_dh_config',
+	TN_ASSET  : gs.getProperty('x_mukl_dh.asset.table', 'alm_hardware'),
+	TN_ASSET_QRY: gs.getProperty('x_mukl_dh.asset.query'),
+	
+	entity : dhEntity.getUserEntity(),
+	
+	type: 'dhUser'
+};
+
+dhUser.prototype.getRelatedTable = function getRelatedTable() {
+	return this.related_table;
+};
+
+dhUser.prototype.getRelatedId = function getRelatedId() {
+	return this.related_id;
+};
+
+dhUser.prototype.getId = function getId() {
+	return this.related_id;
+};
+
+dhUser.prototype.getRecord = function getRecord() {
+	
+	if ( this.user_record ) { return this.user_record; }
+	
+	var ur = new GlideRecord(this.getRelatedTable());
+	ur.get(this.getRelatedId());
+	
+	if ( !ur.isValidRecord() ) { return null; }
+	
+	this.user_record = ur;
+	
+	return this.user_record;
+};
+
+dhUser.prototype.getEntity = function getEntity() {
+	
+	if ( this.entity ) { return this.entity; }
+	
+	this.entity = dhEntity.getUserEntity();
+	
+	return this.entity;
+};
+
+dhUser.prototype.getCountryCode = function getCountryCode() {
+	
+	var ur = this.getRecord();
+	if ( !ur ) { return ''; }
+	
+	return (ur.country + '') || '';
+};
+
+dhUser.prototype.getCountryId = function getCountryId() {
+	
+	var code = this.getCountryCode() || 'GB';
+	
+	var cr = new GlideRecord('core_country');
+	cr.get('iso3166_2',code);
+	
+	if ( !cr.isValidRecord() ) { return ''; }
+	
+	return cr.sys_id + '';
+};
+
+dhUser.prototype.getName = function getName() {
+	
+	var ur = this.getRecord();
+	if ( !ur ) { return ''; }
+	
+	return (ur.getDisplayValue() + '') || '';
+};
+
+dhUser.prototype.getEmail = function getEmail() {
+	
+	var ur = this.getRecord();
+	if ( !ur ) { return ''; }
+	
+	return (ur.email + '') || '';
+};
+
+dhUser.prototype.getDays = function getDays() {
+	return this.getCache().days || [];
+};
+
+dhUser.prototype.getEcoScore = function getEcoScore() {
+	// TBC, placeholder only for now
+	return 85.2725;
+};
+
+dhUser.prototype.getMetricItems = function getMetricItems(category) {
+	
+	// Prepare response metrics
+	var scores = [];
+	var entity = this.getEntity();
+		
+	this.getDays().forEach(function(day) {
+		
+		var m = day.metrics[0];
+		
+		if ( !m ) {
+			return {
+				date  : day.date,
+				value : ''
+			};
+		}
+		
+		var metric = entity.getMetric(m.metric_id);
+		
+		// If a category was supplied, filter out non matching metrics
+		if ( category && category != metric.getCategory() ) { return; }
+		
+		var score = {
+			date     : day.date,
+			name     : metric.getName(),
+			label    : metric.getLabel(),
+			category : metric.getCategory(),
+			unit     : metric.getUnit(),
+			value    : m.value
+		};
+		
+		scores.push(score);
+	});
+	
+	return scores;
+};
+
+dhUser.prototype.getDeviceMetrics = function getDeviceMetrics(category) {
+	
+	var user = this;
+	
+	var scores = this.getDeviceNames().map(function(dn) {
+		
+		var dev = user.getDevice(dn);
+		return dev.getDeviceMetrics(category);
+		
+	});
+	
+	return scores;
+};
+
+dhUser.prototype.getDeviceValues = function getDeviceValues(category) {
+	
+	var user = this;
+	
+	var scores = this.getDeviceNames().map(function(dn) {
+		
+		var dev = user.getDevice(dn);
+		return dev.getDeviceValues(category);
+		
+	});
+	
+	return scores;
+};
+
+dhUser.prototype.getCountryMetrics = function getCountryMetrics(category) {
+	
+	// Get the aggregate entity for the Country table
+	var entity = dhEntity.getAggregateEntity('core_country');
+	
+	// Get the instance for this user's country
+	var agg = new dhInstance(this.getCountryId(),entity);
+	
+	return agg.getMetricItems(category);
+};
+
+dhUser.prototype.getCountryValues = function getCountryValues(category) {
+	
+	// Get the aggregate entity for the Country table
+	var entity = dhEntity.getAggregateEntity('core_country');
+	
+	// Get the instance for this user's country
+	var agg = new dhInstance(this.getCountryId(),entity);
+	
+	return agg.getMetricValues(category);
+};
+
+dhUser.prototype.getAllMetrics = function getAllMetrics(category) {
+	
+	// Collect all metrics for this user
+	var scores = {
+		user    : this.getMetricItems(category),
+		devices : this.getDeviceMetrics(category),
+		country : this.getCountryMetrics(category)
+	};
+	
+	return scores;
+};
+
+dhUser.prototype.hasDevice = function hasDevice() {
+	return this.getDeviceNames().length > 0;
+};
+
+dhUser.prototype.getDevices = function getDevices() {
+	
+	if ( this.devices ) { return this.devices; }
+	
+	this.asset_ids    = [];
+	this.device_names = [];
+	this.devices      = {};
+	this.name_index   = {};
+	
+	var asset_id, device_name;
+	
+	var ar = new GlideRecord(this.TN_ASSET);
+	ar.addEncodedQuery(this.TN_ASSET_QUERY);
+	ar.addQuery('assigned_to',this.getId());
+	ar.query();
+	
+	while ( ar.next() ) {
+		
+		asset_id    = ar.sys_id + '';
+		device_name = ar.ci.name + '';
+		
+		this.asset_ids.push(asset_id);
+		this.device_names.push(device_name);
+		
+		this.devices[asset_id] = new dhDevice(this,ar);
+		this.name_index[device_name] = asset_id;
+		
+	}
+	
+	return this.devices;
+};
+
+dhUser.prototype.getAssetId = function getAssetId(device_name) {
+	
+	if ( !this.name_index ) { this.getDevices(); }
+	
+	return this.name_index[device_name] || '';
+};
+
+dhUser.prototype.getAssetIds = function getAssetIds() {
+	
+	if ( !this.asset_ids ) { this.getDevices(); }
+	
+	return this.asset_ids;
+};
+
+dhUser.prototype.getDeviceNames = function getDeviceNames() {
+	
+	if ( !this.device_names ) { this.getDevices(); }
+	
+	return this.device_names;
+};
+
+dhUser.prototype.getDevice = function getDevice(key) {
+	
+	var devices = this.getDevices();
+	
+	// Use the name of the first device, if not specified
+	if ( !key ) {
+		key = this.getDeviceNames()[0];
+		if ( !key ) { return null; }
+	}
+	
+	// Try using asset_id lookup
+	if ( key in devices ) { return devices[key]; }
+	
+	// Try using device_name index
+	return devices[this.name_index[key]] || null;
+};
+
+dhUser.prototype.toString = function toString() {
+	return this.type + ' "' + this.getName() + '" [' + this.getRelatedTable() + ':' + this.getRelatedId() + ']';
+};
+
+//------------------------------------------------
+// Internal support methods
+//------------------------------------------------
+
+dhUser.prototype.getCache = function getCache() {
+	
+	if ( this.cache ) { return this.cache; }
+	
+	this.cache = new dhCache().getInstanceData(this);
+	
+	return this.cache;
+};
+
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:20</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>9169bc4c9392cf506214fe327cba1001</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>dhUser</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_9169bc4c9392cf506214fe327cba1001</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-08-03 10:09:53</sys_updated_on>
+    </sys_script_include>
+</record_update>

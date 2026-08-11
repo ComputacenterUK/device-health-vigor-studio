@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-08-10 10:29:19</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>e6f554b293e207106214fe327cba105b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_mukl_dh_metric_cache.x_mukl_dh.actions_user</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_security_acl display_value="x_mukl_dh_metric_cache">604b8840939e8f506214fe327cba10b0</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_e6f554b293e207106214fe327cba105b</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-08-10 10:29:19</sys_updated_on>
+        <sys_user_role display_value="x_mukl_dh.actions_user" name="x_mukl_dh.actions_user">582ac4cc935e8f506214fe327cba1033</sys_user_role>
+    </sys_security_acl_role>
+</record_update>

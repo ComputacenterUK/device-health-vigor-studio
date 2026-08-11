@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.dhDevice</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>A Class to define a Device object for DeviceHealth</description>
+        <mobile_callable>false</mobile_callable>
+        <name>dhDevice</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var dhDevice = function dhDevice( user, asset ) {
+	
+	this.user = user;
+	
+	this.related_table = this.entity.getRelatedTable();
+	this.related_id    = asset.sys_id + '';
+	
+	this.device_name = asset.ci.name + '';
+	this.device_uid;
+	
+};
+
+dhDevice.prototype = {
+	
+	TN_CONFIG : 'x_mukl_dh_config',
+	TN_ASSET  : gs.getProperty('x_mukl_dh.asset.table', 'alm_hardware'),
+	
+	entity : dhEntity.getDeviceEntity(),
+	
+	type: 'dhDevice'
+};
+
+// Property methods
+
+dhDevice.prototype.getRelatedTable = function getRelatedTable() {
+	return this.related_table;
+};
+
+dhDevice.prototype.getRelatedId = function getRelatedId() {
+	return this.related_id;
+};
+
+dhDevice.prototype.getCacheRecord = function getCacheRecord() {
+	
+	if ( this._record ) { return this._record; }
+	
+	var cache = new dhCache();
+	var cr = cache.getDeviceRecord(this);
+	
+	if ( !cr || !cr.isValidRecord() ) { return null; }
+	
+	this._record = cr;
+	
+	return this._record;
+};
+
+dhDevice.prototype.getEntity = function getEntity() {
+	
+	if ( this.entity ) { return this.entity; }
+	
+	this.entity = dhEntity.getDeviceEntity();
+	
+	return this.entity;
+};
+
+dhDevice.prototype.getUser = function getUser() {
+	return this.user;
+};
+
+dhDevice.prototype.getAssetId = function getAssetId() {
+	return this.related_id;
+};
+
+dhDevice.prototype.getAssetRecord = function getAssetRecord() {
+	
+	if ( this.asset_record ) { return this.asset_record; }
+	
+	var ar = new GlideRecord(this.getRelatedTable());
+	ar.get(this.getRelatedId());
+	
+	if ( !ar.isValidRecord() ) { return null; }
+	
+	this.asset_record = ar;
+	
+	return this.asset_record;
+};
+
+dhDevice.prototype.getDeviceName = function getDeviceName() {
+	return this.device_name;
+};
+
+dhDevice.prototype.getDeviceUid = function getDeviceUid() {
+	return this.getCache().device_uid || '';
+};
+
+dhDevice.prototype.getActions = function getActions() {
+	return this.actions || [];
+};
+
+dhDevice.prototype.hasMetrics = function hasMetrics() {
+	return !!this.metrics && this.metrics.length;
+};
+
+dhDevice.prototype.getDays = function getDays() {
+	return this.getCache().days || [];
+};
+
+dhDevice.prototype.getOverallScore = function getOverallScore() {
+	return this.getCache().overall_score || '';
+};
+
+dhDevice.prototype.getMetrics = function getMetrics() {
+	return this.metrics || [];
+};
+
+dhDevice.prototype.getEuaMetrics = function getEuaMetrics(category) {
+	
+	var day_metrics = this.getDays()[0].metrics;
+	var metrics = [];
+	var entity  = this.getEntity();
+	
+	day_metrics.forEach(function(m) {
+		var md = entity.getMetric(m.metric_id);
+		if ( category && md.getCategory() != category ) { return; }
+		metrics.push([ md.getLabel(), m.value ]);
+	});
+	
+	return metrics;
+};
+
+dhDevice.prototype.getCacheId = function getCacheId() {
+	
+	if (this.cache_id) { return this.cache_id; }
+	
+	var cr = new GlideRecord('x_mukl_dh_metric_cache');
+	cr.addQuery('type', 'Metric');
+	cr.addQuery('asset', this.getRelatedId());
+	cr.query();
+	
+	if (!cr.next()) {
+		return '';
+	}
+	
+	this.cache_id = cr.sys_id + '';
+	
+	return this.cache_id;
+};
+
+dhDevice.prototype.getDeviceMetrics = function getDeviceMetrics(category) {
+	
+	
+	
+	var device_name = this.getDeviceName();
+	var asset_id    = this.getRelatedId();
+	var model  = this.getAssetRecord()?.model.getDisplayValue() + '';
+	var day    = this.getDays()[0];
+	var entity = this.getEntity();
+
+	this.actions = this.compile_actions();
+	
+	var resp = {
+		name     : device_name,
+		asset_id : asset_id,
+		asset_model : model,
+		date     : '',
+		metrics  : [],
+		actions  : this.actions
+	};
+	
+	if ( !day || !day.metrics.length ) {
+		resp.error = 'No data collected for this device';
+		return resp;
+	}
+	
+	// Prepare response metrics
+	day.metrics.forEach(function(m) {
+		
+		var metric = entity.getMetric(m.metric_id);
+		
+		// If a category was supplied, filter out non matching metrics
+		if ( category && category != metric.getCategory() ) { return; }
+		
+		var item = {
+			name     : metric.getName(),
+			label    : metric.getLabel(),
+			category : metric.getCategory(),
+			unit     : metric.getUnit(),
+			value    : m.value
+		};
+		
+		resp.metrics.push(item);
+	});
+	
+	return resp;
+};
+
+dhDevice.prototype.getDeviceValues = function getDeviceValues(category) {
+	
+	var resp = {
+		name   : this.getDeviceName(),
+		values : {}
+	};
+	
+	// Generate response for the latest day
+	var day    = this.getDays()[0];
+	var entity = this.getEntity();
+	
+	if ( !day || !day.metrics.length ) {
+		resp.error = 'No data collected for this item';
+		return resp;
+	}
+	
+	resp.date = day.date;
+	
+	// Prepare response
+	day.metrics.forEach(function(m) {
+		
+		var metric = entity.getMetric(m.metric_id);
+		
+		// If a category was supplied, filter out non matching metrics
+		if ( category && category != metric.getCategory() ) { return; }
+		
+		var name = metric.getName();
+		var val  = m.value;
+		
+		resp.values[name] = val;
+	});
+	
+	return resp;
+};
+
+// Action methods
+dhDevice.prototype.setMetrics = function setMetrics(item, labels) {
+	// Ignore missing items, or incorrect device name
+	if (!item || item.device_name != this.getDeviceName()) {
+		return;
+	}
+	
+	this.metrics = [];
+	
+	// Process item properties
+	for (var p in item) {
+		if (p in labels) {
+			// This is a labelled metric, store as metric if it has a value
+			if (item[p] !== null) {
+				this.metrics.push([labels[p], item[p]]);
+			}
+		} else {
+			// Not a metric, add to device
+			if (p == 'sys_id') {
+				this.cache_id = item[p];
+			} else if (p == 'actions') {
+				this.actions = item[p];
+			} else {
+				this[p] = item[p];
+			}
+		}
+	}
+};
+
+dhDevice.prototype.executeAction = function executeAction(action_id) {
+	var cache_id = this.getCacheId();
+	
+	var api = new DHAPI();
+	var resp = api.executeRemoteAction(action_id, cache_id);
+	
+	return resp && resp.status == 200;
+};
+
+dhDevice.prototype.getReport = function getReport(plog) {
+	
+	var log = plog || [];
+	
+	log.push('Device ' + this.device_name + ' has the following metrics');
+	log.push('');
+	
+	for (var label in this.metrics) {
+		log.push('\t' + label + '\t[' + this.metrics[label] + ']');
+	}
+	log.push('');
+	
+	log.push('    The following actions are available:');
+	
+	this.actions.forEach(function (a) {
+		if ( a.run_today ) { return; }
+		log.push('\t' + a.title + '\t[' + a.type + ']');
+	});
+	log.push('');
+	
+	if (plog) { return; }
+	
+	return log.join('\n');
+};
+
+dhDevice.prototype.toString = function toString() {
+	return this.type + ' ' + this.getDeviceName() + ' [' + this.getRelatedTable() + ':' + this.getRelatedId() + ']';
+};
+
+dhDevice.prototype.compile_actions = function compile_actions() {
+	
+	// Read action data for this device from the cache
+	var cache = new dhCache();
+	var action_data = cache.getActionData(this);
+	var action_ids  = action_data.action_ids;
+	var run_today   = action_data.executed_ids;
+	
+	var actions = [];
+	
+	if ( !action_ids || !action_ids.length ) { return actions; }
+	
+	// Get all actions an an associated
+	var ar = new GlideRecord('x_mukl_dh_actions');
+	ar.addActiveQuery();
+	ar.addQuery('sys_id', 'IN', action_ids);
+	ar.query();
+	
+	var act;
+	var fields = [
+		'sys_id',
+		'title', 'action_text', 'short_description',
+		'type', 'page_link', 'parameters', 
+		'url', 'script', 'category', 'ai_guidance'
+	];
+	
+	function addfield(f) { act[f] = ar[f] + ''; }
+	
+	while ( ar.next() ) {
+		
+		act = {};
+		fields.forEach(addfield);
+
+		//we need page_link display value
+		act.page_link = ar.page_link.id+"";
+		
+		actions.push(act);
+		
+		//if remote action check if it's been run
+		if ( ( act.type == 'remote_action' || act.type == 'server_script' ) &&
+				run_today.indexOf(act.sys_id) > -1 	
+		) {
+			act.run_today = true;
+		}
+		
+	}
+	
+	return actions;
+};
+
+dhDevice.prototype.getCache = function getCache() {
+	
+	if ( this.cache ) { return this.cache; }
+	
+	this.cache = new dhCache().getInstanceData(this);
+	
+	return this.cache;
+};
+
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:20</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>9d697c4c9392cf506214fe327cba10fa</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>dhDevice</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_9d697c4c9392cf506214fe327cba10fa</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-08-03 14:43:56</sys_updated_on>
+    </sys_script_include>
+</record_update>

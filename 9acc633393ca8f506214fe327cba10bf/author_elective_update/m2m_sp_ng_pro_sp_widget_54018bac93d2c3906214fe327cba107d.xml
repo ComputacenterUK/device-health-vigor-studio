@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_ng_pro_sp_widget">
+    <m2m_sp_ng_pro_sp_widget action="DELETE">
+        <sp_angular_provider display_value="DHService">91daea833bda36101d7e8bc964e45adf</sp_angular_provider>
+        <sp_widget display_value="DH Device Actions">54018bac93d2c3906214fe327cba1079</sp_widget>
+        <sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 12:53:46</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>54018bac93d2c3906214fe327cba107d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DHService.DH Device Actions</sys_name>
+        <sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>m2m_sp_ng_pro_sp_widget_54018bac93d2c3906214fe327cba107d</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 12:53:46</sys_updated_on>
+    </m2m_sp_ng_pro_sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</application>
+        <file_path/>
+        <instance_id>98cabcee4fc252807b9b220f0310c751</instance_id>
+        <instance_name>ven01619</instance_name>
+        <name>m2m_sp_ng_pro_sp_widget_54018bac93d2c3906214fe327cba107d</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_ng_pro_sp_widget"><m2m_sp_ng_pro_sp_widget action="INSERT_OR_UPDATE"><sp_angular_provider display_value="DHService">91daea833bda36101d7e8bc964e45adf</sp_angular_provider><sp_widget display_value="DH Device Actions">54018bac93d2c3906214fe327cba1079</sp_widget><sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name><sys_created_by>peter.watt</sys_created_by><sys_created_on>2026-07-22 12:53:46</sys_created_on><sys_customer_update>false</sys_customer_update><sys_id>54018bac93d2c3906214fe327cba107d</sys_id><sys_mod_count>0</sys_mod_count><sys_name>DHService.DH Device Actions</sys_name><sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope><sys_update_name>m2m_sp_ng_pro_sp_widget_54018bac93d2c3906214fe327cba107d</sys_update_name><sys_updated_by>peter.watt</sys_updated_by><sys_updated_on>2026-07-22 12:53:46</sys_updated_on></m2m_sp_ng_pro_sp_widget></record_update>]]></payload>
+        <payload_hash>-59274635</payload_hash>
+        <record_name>DHService.DH Device Actions</record_name>
+        <reverted_from/>
+        <source>52cc633393ca8f506214fe327cba10c8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 12:53:47</sys_created_on>
+        <sys_id>5401cbac93d2c3906214fe327cba10b7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19f89e3ab820000001</sys_recorded_at>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 12:53:47</sys_updated_on>
+        <type>Angular Providers</type>
+        <update_guid>54018bac14d2c390955faa3f0323c37f</update_guid>
+        <update_guid_history>54018bac14d2c390955faa3f0323c37f:-59274635</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Record deleted 2026-07-28 10:15:43">60a809a2939ec3106214fe327cba1023</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-28 09:15:43</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_db_object display_value="" name="m2m_sp_ng_pro_sp_widget">m2m_sp_ng_pro_sp_widget</sys_db_object>
+        <sys_id>79a43e61fc9e4d2a82c49126efc84e64</sys_id>
+        <sys_metadata>54018bac93d2c3906214fe327cba107d</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DHService.DH Device Actions</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope_delete display_value="">e547d1fba4c442beaaff218a21fdaf04</sys_scope_delete>
+        <sys_update_name>m2m_sp_ng_pro_sp_widget_54018bac93d2c3906214fe327cba107d</sys_update_name>
+        <sys_update_version display_value="m2m_sp_ng_pro_sp_widget_54018bac93d2c3906214fe327cba107d">5401cbac93d2c3906214fe327cba10b7</sys_update_version>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-28 09:15:43</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

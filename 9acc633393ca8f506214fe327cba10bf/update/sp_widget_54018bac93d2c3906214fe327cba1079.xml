@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function (DHManagerService, $scope, $timeout) {
+	var c = this;
+	c.loading = null;
+	c.actions = [];
+
+	$scope.$watch(
+		() => DHManagerService.assetsLoading,
+		(loading) => (c.loading = loading),
+	);
+
+	c.$onInit = function () {
+		$scope.$watch(
+			() => DHManagerService.state.selectedAsset,
+			function (newVal) {
+				c.loading = true;
+				$timeout(() => {
+					if (!newVal) return;
+					c.selectedAsset = newVal;
+					c.actions = DHManagerService.getSelectedAssetInfo()?.actions?.filter(
+						(action) => action.category === "performance",
+					);
+					c.loading = false;
+
+				}, 100);
+
+			},
+		);
+
+		// DHManagerService.getDexScores().then(
+		//   (r) => {
+		//     var dexScores = r?.data;
+		//     c.currentDexScore =
+		//       dexScores && dexScores.length > 0
+		//         ? Math.floor(dexScores[0].dex_score)
+		//         : 0;
+		//     c.displayLogAnIssueAction =
+		//       c.currentDexScore <= 45 && c.data.enable_log_an_issue_action;
+		//   },
+		//   (e) => console.error(e)
+		// );
+	};
+
+	c.getIcon = function (action) {
+		switch (action.type) {
+			case "remote_action":
+				return "fa-medkit";
+			case "url":
+			case "page":
+				return "fa-external-link";
+			case "client_script":
+				return "fa-cogs";
+			case "server_script":
+				return "fa-cogs";
+			default:
+				return "fa-arrow-right";
+		}
+	};
+
+	c.runAction = async function (action) {
+
+		const device = DHManagerService.getSelectedAssetInfo();
+		if (!device) return;
+
+		if (
+			action.type == "page" ||
+			action.type == "url" ||
+			action.type == "client_script"
+		) {
+			console.log("Logging action", action);
+			logActionExecution(action, device);
+		}
+
+		device.executeAction(action);
+	};
+
+	function logActionExecution(action, device) {
+		c.server.get({
+			action: "log-action",
+			data: {
+				device,
+				action,
+			},
+		});
+	}
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.error-display {
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    font-size: large;
+    font-weight: bold;
+    gap: 20px;
+
+    img {
+        max-width: 450px;
+        max-height: 150px;
+    }
+}
+
+.loading {
+    min-height: 15rem;
+    width: 100%;
+    border-radius: 1rem;
+    background: #f6f7f8;
+    background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background-repeat: no-repeat;
+    background-size: 100rem 28rem;
+    animation: shimmer 2s infinite linear;
+ }
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid rgba(101, 110, 129, .5);
+
+    .text {
+        .title {
+            font-size: large;
+            font-weight: bold;
+        }
+    }
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>dh_device_actions</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>DH Device Actions</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function () {
+		
+	data.ra_message_title = gs.getMessage('dh.action.remote.one_time.title');
+	data.ra_message = gs.getMessage('dh.action.remote.one_time');
+	data.enable_log_an_issue_action = gs.getProperty('x_mukl_dh.enable.log.an.issue.action', true) == 'true';
+	
+  if(input && input.action == "log-action") {
+
+     //TODO HOOK INTO NEW MODEL TO LOG ACTION EXECUTION! 
+    //data.logged = EUAMetricCache.cacheActionExecution(input.data);
+    return;
+  }
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 12:53:46</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>54018bac93d2c3906214fe327cba1079</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>DH Device Actions</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_widget_54018bac93d2c3906214fe327cba1079</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-08-03 14:46:08</sys_updated_on>
+        <template><![CDATA[<div class="panel panel-body">
+  <div id="dh-container">
+    <div class="header-text">
+      <div class="title">
+        <h2>${dh.portal.deviceActions.title}</h2>
+      </div>
+      <p>${dh.portal.deviceActions.subheader}</p>
+    </div>
+    <div ng-class="{'loading': c.loading === true}">
+      <div
+        class="device-actions"
+        ng-if="c.selectedAsset && (c.actions.length > 0 || c.displayLogAnIssueAction) && !c.loading"
+      >
+        <!-- <ng-include ng-if="c.actions.length > 0" ng-repeat="action in c.actions track by action.sys_id" src="'action.html'"></ng-include>
+        <ng-include ng-if="c.actions.length == 0 && c.displayLogAnIssueAction" src="'log-an-issue-action.html'"></ng-include> -->
+        <div class="action" ng-repeat="action in c.actions track by action.sys_id">
+          <div class="text">
+            <div class="title">
+              <i class="fa" ng-class="c.getIcon(action)" aria-hidden="true"></i
+              >&nbsp; {{action.title}}
+            </div>
+            <div class="description">{{action.short_description}}</div>
+          </div>
+          <div
+            ng-attr-data-toggle="{{ action.run_today ? 'tooltip' : undefined }}"
+            ng-attr-title="{{ action.run_today ? '${dh.action.one_time.tooltip}' : undefined }}"
+          >
+            <button
+              type="button"
+              class="btn btn-primary"
+              tabindex="0"
+              ng-click="c.runAction(action)"
+              ng-disabled="action.run_today || action.executingAction"
+            >
+              {{action.action_text}}
+            </button>
+          </div>
+        </div>
+        <!-- <pre>{{c.actions | json}}</pre> -->
+      </div>
+
+      <!-- No actions found -->
+      <div
+        class="error-display"
+        ng-if="c.selectedAsset && (!c.actions || c.actions.length == 0) && !c.displayLogAnIssueAction && !c.loading"
+      >
+        <img src="x_mukl_dh.grid_item_no_score.png" />
+        <span ng-if="!c.hasDevices">${dh.portal.no_actions}</span>
+      </div>
+
+      <!-- No device selected -->
+      <div class="error-display" ng-if="!c.selectedAsset && !c.loading">
+        <img src="x_mukl_dh.grid_item_no_score.png" />
+        <span ng-if="!c.hasDevices">${dh.portal.select_device}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<now-message
+  key="dh.action.remote.one_time.title"
+  value="${dh.action.remote.one_time.title}"
+></now-message>
+<now-message
+  key="dh.action.remote.one_time"
+  value="${dh.action.remote.one_time}"
+></now-message>
+]]></template>
+    </sp_widget>
+</record_update>

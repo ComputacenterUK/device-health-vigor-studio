@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_ng_template">
+    <sp_ng_template action="INSERT_OR_UPDATE">
+        <id>dh-headline-stat.html</id>
+        <sp_widget display_value="DH My Green IT">7ad8cc962b56cf5011e6f4e7d891bf35</sp_widget>
+        <sys_class_name>sp_ng_template</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-27 10:36:32</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>948110562b96cf5011e6f4e7d891bf26</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>dh-headline-stat.html</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_ng_template_948110562b96cf5011e6f4e7d891bf26</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-27 10:36:32</sys_updated_on>
+        <template><![CDATA[<div class="stat-title">
+  <h3 class="title">{{stat.label}}</h3>
+  <small>${over 30 days}</small>
+</div>
+<div
+  class="value"
+  ng-class="c.metricComparison[device.asset_id][stat.name].isOver ? 'text-danger' : 'text-success'"
+  style="--bg-dynamic: oklch(from currentColor l c h / 0.06);"
+>
+  <span class="stat-value"> {{c.valParse(stat.value)}} {{stat.unit}} </span>
+  <i
+    class="fa fa-2x"
+    ng-class="{'fa-bolt': stat.unit == 'Wh','fa-leaf': stat.unit == 'KgCO2e','fa-globe': stat.unit == ''}"
+    aria-hidden="true"
+  ></i>
+</div>
+<small class="description">
+  <i
+    class="fa"
+    ng-class="c.metricComparison[device.asset_id][stat.name].isOver ? 'fa-long-arrow-up' : 'fa-long-arrow-down'"
+    aria-hidden="true"
+  ></i
+  ><span>
+    {{c.metricComparison[device.asset_id][stat.name].percentDifference}}%
+    {{c.metricComparison[device.asset_id][stat.name].isOver ? 'over' : 'under'}}
+    average
+  </span>
+</small>
+]]></template>
+    </sp_ng_template>
+</record_update>

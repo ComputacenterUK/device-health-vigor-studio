@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="" section_id="72fa0400939e8f506214fe327cba1060" sys_domain="global" table="x_mukl_dh_config" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>0</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>be140f249316c3906214fe327cba105a</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>name</element>
+            <position>1</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>7e140f249316c3906214fe327cba105b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>label</element>
+            <position>2</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>3a140f249316c3906214fe327cba105c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>entity</element>
+            <position>3</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>f2140f249316c3906214fe327cba105d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>entity_type</element>
+            <position>4</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>be140f249316c3906214fe327cba105d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>metric_type</element>
+            <position>5</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>7a140f249316c3906214fe327cba105e</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>metric_unit</element>
+            <position>6</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>36140f249316c3906214fe327cba105f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>metric_category</element>
+            <position>7</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>fe140f249316c3906214fe327cba105f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>8</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>ba140f249316c3906214fe327cba1060</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>config_type</element>
+            <position>9</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>76140f249316c3906214fe327cba1061</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>system</element>
+            <position>10</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>32140f249316c3906214fe327cba1062</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>system_id</element>
+            <position>11</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>fa140f249316c3906214fe327cba1062</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>max_days</element>
+            <position>12</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>b6140f249316c3906214fe327cba1063</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>active</element>
+            <position>13</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>72140f249316c3906214fe327cba1064</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>14</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>3e140f249316c3906214fe327cba1064</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>short_description</element>
+            <position>15</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>f6140f249316c3906214fe327cba1065</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>related_table</element>
+            <position>16</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-22 13:07:20</sys_created_on>
+            <sys_id>b2140f249316c3906214fe327cba1066</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-22 13:07:20</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>value_type</element>
+            <position>17</position>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-28 15:15:46</sys_created_on>
+            <sys_id>b60b9aea935607106214fe327cba10f9</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_mukl_dh_config" sys_domain="global" view="Default view">72fa0400939e8f506214fe327cba1060</sys_ui_section>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-28 15:15:46</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption/>
+            <header>false</header>
+            <name>x_mukl_dh_config</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-20 10:21:33</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>72fa0400939e8f506214fe327cba1060</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_mukl_dh_config</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+            <sys_update_name>sys_ui_section_72fa0400939e8f506214fe327cba1060</sys_update_name>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-20 10:21:33</sys_updated_on>
+            <sys_user/>
+            <title>true</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

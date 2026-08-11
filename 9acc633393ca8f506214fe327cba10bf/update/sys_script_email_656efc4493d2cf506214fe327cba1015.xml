@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_email">
+    <sys_script_email action="INSERT_OR_UPDATE">
+        <name>dh_device_health_page_url</name>
+        <new_lines_to_html>false</new_lines_to_html>
+        <script><![CDATA[(function runMailScript(current, template, email, email_action, event) {
+
+	var instanceURL = gs.getProperty('glide.servlet.uri');
+	var portalSuffix = 'ec';
+
+	var grPortal = new GlideRecord('sp_portal');
+	grPortal.addQuery('inactive', false);
+	grPortal.addQuery('default', true);
+	grPortal.orderByDesc('sys_updated_on');
+	grPortal.setLimit(1);
+	grPortal.query();
+
+	if (grPortal.next()) {
+		portalSuffix = grPortal.getValue('url_suffix');
+	}
+
+	var deviceHealthPageURL = instanceURL + portalSuffix + '?id=dh_digital_experience';
+	var deviceHealthPageText = gs.getMessage('Open My Device Health');
+
+	template.print('<a href="' + deviceHealthPageURL + '">' + deviceHealthPageText + '</a>');
+
+})(current, template, email, email_action, event);]]></script>
+        <sys_class_name>sys_script_email</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 14:06:54</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>656efc4493d2cf506214fe327cba1015</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>dh_device_health_page_url</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_email_656efc4493d2cf506214fe327cba1015</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-20 14:06:54</sys_updated_on>
+    </sys_script_email>
+</record_update>

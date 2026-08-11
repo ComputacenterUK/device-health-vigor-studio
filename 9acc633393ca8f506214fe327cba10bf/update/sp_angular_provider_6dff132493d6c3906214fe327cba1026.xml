@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_angular_provider">
+    <sp_angular_provider action="INSERT_OR_UPDATE">
+        <name>DHDeviceFactory</name>
+        <script><![CDATA[/**
+ * Device object used across DH services.
+ * The keys are derived from the `defaults` object in `DHDevice.script.js`.
+ * @typedef {Object} Device
+ * @property {string} asset_id - Asset identifier used by server APIs.
+ * @property {string} asset_model - Model identifier or name.
+ * @property {string} name - Human readable device name.
+ * @property {string} overall_score - Overall status/score as string.
+ * @property {Array<Object>} actions - Array of action objects available for the device.
+ * @property {Array<Object>} metrics - Array of metric objects for the device.
+ * @property {?Object|Error} error - Optional error object.
+ * @property {function(Object=):void} update - Instance method to merge new properties into the device.
+ * @property {function(Object):Promise<any>} executeAction - Instance method to execute an action on the device.
+ */
+
+function DHDeviceFactory(DHActionFactory) {
+  /**
+   * Device constructor
+   * @param {Object} [props] Initial properties to apply to the device
+   * @returns {Device} New Device instance
+   */
+  const Device = function Device(props) {
+    const defaults = {
+      asset_id: "",
+      asset_model: "",
+      name: "",
+      overall_score: "",
+      actions: [],
+      metrics: [],
+      error: null
+    };
+
+    Object.seal(defaults);
+    Object.assign(this, defaults);
+    
+    this.update(props);
+  }
+
+  /**
+   * Merge new properties into the device instance. Only keys present in
+   * the defaults will be copied.
+   * @param {Object} [newProps]
+   * @returns {void}
+   */
+  Device.prototype.update = function (newProps) {
+    if (!newProps) return;
+
+    // Loop through the new properties
+    Object.keys(newProps).forEach((key) => {
+      // Check if the key exists on the instance (initialized by defaults)
+      if (this.hasOwnProperty(key)) {
+        this[key] = newProps[key];
+      }
+    });
+  };
+
+  /**
+   * Instance method to execute an action
+   * @param {Object} action Action object to execute
+   * @returns {Promise<any>} Result of the action execution
+   */
+  Device.prototype.executeAction = async function (action) {
+    return DHActionFactory.executeAction(action, this);
+  };
+
+  return Device;
+}
+
+
+]]></script>
+        <sys_class_name>sp_angular_provider</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 15:10:52</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>6dff132493d6c3906214fe327cba1026</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DHDeviceFactory</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_angular_provider_6dff132493d6c3906214fe327cba1026</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 15:10:52</sys_updated_on>
+        <type>factory</type>
+    </sp_angular_provider>
+</record_update>

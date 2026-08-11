@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_ng_pro_sp_widget">
+    <m2m_sp_ng_pro_sp_widget action="DELETE">
+        <sp_angular_provider display_value="DHAPIService">2b3a8fec9316c3906214fe327cba105b</sp_angular_provider>
+        <sp_widget display_value="DH Device Health Score">4e2183ec93d2c3906214fe327cba1021</sp_widget>
+        <sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 13:48:29</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>e18d03649356c3906214fe327cba109a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DHAPIService.DH Device Health Score</sys_name>
+        <sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>m2m_sp_ng_pro_sp_widget_e18d03649356c3906214fe327cba109a</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 13:48:29</sys_updated_on>
+    </m2m_sp_ng_pro_sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</application>
+        <file_path/>
+        <instance_id>98cabcee4fc252807b9b220f0310c751</instance_id>
+        <instance_name>ven01619</instance_name>
+        <name>m2m_sp_ng_pro_sp_widget_e18d03649356c3906214fe327cba109a</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_ng_pro_sp_widget"><m2m_sp_ng_pro_sp_widget action="INSERT_OR_UPDATE"><sp_angular_provider display_value="DHAPIService">2b3a8fec9316c3906214fe327cba105b</sp_angular_provider><sp_widget display_value="DH Device Health Score">4e2183ec93d2c3906214fe327cba1021</sp_widget><sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name><sys_created_by>peter.watt</sys_created_by><sys_created_on>2026-07-22 13:48:29</sys_created_on><sys_customer_update>false</sys_customer_update><sys_id>e18d03649356c3906214fe327cba109a</sys_id><sys_mod_count>0</sys_mod_count><sys_name>DHAPIService.DH Device Health Score</sys_name><sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope><sys_update_name>m2m_sp_ng_pro_sp_widget_e18d03649356c3906214fe327cba109a</sys_update_name><sys_updated_by>peter.watt</sys_updated_by><sys_updated_on>2026-07-22 13:48:29</sys_updated_on></m2m_sp_ng_pro_sp_widget></record_update>]]></payload>
+        <payload_hash>227753117</payload_hash>
+        <record_name>DHAPIService.DH Device Health Score</record_name>
+        <reverted_from/>
+        <source>52cc633393ca8f506214fe327cba10c8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 13:48:29</sys_created_on>
+        <sys_id>a98dc3649356c3906214fe327cba1055</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19f8a15c1240000001</sys_recorded_at>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 13:48:29</sys_updated_on>
+        <type>Angular Providers</type>
+        <update_guid>e18d0364b656c390d6034613f93fd29c</update_guid>
+        <update_guid_history>e18d0364b656c390d6034613f93fd29c:227753117</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Record deleted 2026-07-22 16:14:50">2e41a3a493d6c3906214fe327cba108c</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 15:14:50</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_db_object display_value="" name="m2m_sp_ng_pro_sp_widget">m2m_sp_ng_pro_sp_widget</sys_db_object>
+        <sys_id>39fd16a181af47e0af0c019c227b8910</sys_id>
+        <sys_metadata>e18d03649356c3906214fe327cba109a</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DHAPIService.DH Device Health Score</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope_delete display_value="">e547d1fba4c442beaaff218a21fdaf04</sys_scope_delete>
+        <sys_update_name>m2m_sp_ng_pro_sp_widget_e18d03649356c3906214fe327cba109a</sys_update_name>
+        <sys_update_version display_value="m2m_sp_ng_pro_sp_widget_e18d03649356c3906214fe327cba109a">a98dc3649356c3906214fe327cba1055</sys_update_version>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 15:14:50</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

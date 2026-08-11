@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_ng_template">
+    <sp_ng_template action="INSERT_OR_UPDATE">
+        <id>dh-device-metric.html</id>
+        <sp_widget display_value="DH Device Metrics">624147ec93d2c3906214fe327cba10c8</sp_widget>
+        <sys_class_name>sp_ng_template</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-24 09:19:07</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>f1e2e4559352c7906214fe327cba1064</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>dh-device-metric.html</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_ng_template_f1e2e4559352c7906214fe327cba1064</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-24 09:19:07</sys_updated_on>
+        <template><![CDATA[<div class="metric">
+    <div class="title">{{metric.label}}</div>
+    <div class="rating margin-sm" ng-if="c.options.rating_type == 'Text'" ng-class="metric.value">{{metric.value}}</div>
+    <div class="rating" ng-if="c.options.rating_type == 'Icon'" data-toggle="tooltip" data-placement="right" title="{{metric.rating}}">
+        <svg ng-if="metric.value == 'good'" data-id="3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8" style="color: green"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+        <svg ng-if="metric.value == 'average'" data-id="9" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8" style="color: orange"><circle cx="12" cy="12" r="10"></circle><line x1="8" x2="16" y1="15" y2="15"></line><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+        <svg ng-if="metric.value == 'poor'" data-id="9" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8" style="color: red"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+    </div>
+</div>]]></template>
+    </sp_ng_template>
+</record_update>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_policy_rl_action">
+    <sys_ui_policy_rl_action action="INSERT_OR_UPDATE">
+        <list>x_mukl_dh_metric_cache.parent</list>
+        <sys_class_name>sys_ui_policy_rl_action</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-29 14:43:28</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>553ddf3e935e0f501a34fedcdd03d618</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_mukl_dh_metric_cache.parent</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_ui_policy_rl_action_553ddf3e935e0f501a34fedcdd03d618</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-29 14:43:28</sys_updated_on>
+        <ui_policy display_value="Type is Metric">b21d573e935e0f501a34fedcdd03d693</ui_policy>
+        <visible>false</visible>
+    </sys_ui_policy_rl_action>
+</record_update>

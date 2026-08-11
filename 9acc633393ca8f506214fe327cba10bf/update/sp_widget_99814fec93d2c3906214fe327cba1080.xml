@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function ($location, $timeout, DHManagerService) {
+
+	var c = this;
+	c.loading = true;
+	c.hasDevices = false;
+	c.score = null;
+	c.maxScore = 100;
+
+	/* ----------DEV STUFF----------- */
+	c.updateGraph = function(score) {
+		if (!c.loading) {
+			createChart(score);
+		} else {
+			createChart(0);
+		}
+	}
+	/* --------END DEV STUFF---------- */
+
+	// Scorebounds are the upper limits for a score, e.g. any score less than the value for 'bad' is considered a bad score
+	const scoreBounds = {
+		bad: 33,
+		avg: 66,
+	};
+
+	DHManagerService.getDexScores().then((r) => {
+
+		$timeout(() => {
+
+			const scores = r?.data;
+
+			if(!scores || scores.length == 0)
+				return;
+
+			const sortedScores = DHManagerService.sortScoresByDate(scores, true);
+
+			c.score = parseInt(sortedScores[0]?.value)?.toFixed();
+
+			createChart(c.score);
+			c.loading = false;
+		});
+	});
+
+	c.$onInit = () => {
+		c.hasDevices = c.data.userHasDevices;
+	}
+
+	c.getScoreRating = (value) => {
+		if (value < scoreBounds.bad) {
+			return "bad";
+		} else if (value < scoreBounds.avg) {
+			return "avg";
+		} else {
+			return "good";
+		}
+	};
+
+	c.navToPage = () => {
+		$location.search({ id: "dh_digital_experience" });
+	};
+
+	function calcSeries(value) {
+		if (!value) {
+			return null;
+		}
+
+		let series = [];
+
+		if (value < scoreBounds.bad) {
+			series.push({ data: [parseFloat(value)] });
+		} else if (value < scoreBounds.avg) {
+			series.push(
+				{ data: [scoreBounds.bad] },
+				{ data: [value - scoreBounds.bad] }
+			);
+		} else {
+			series.push(
+				{ data: [scoreBounds.bad] },
+				{ data: [scoreBounds.avg - scoreBounds.bad] },
+				{ data: [value - scoreBounds.avg] }
+			);
+		}
+
+		return series;
+	}
+
+	// Calculate the color of the chart based on 
+	function calcColors(value) {
+		if (!value) {
+			return null;
+		}
+
+		let colors = [];
+
+		if (c.data.useMultiColors) {
+			colors = ["red", "orange", "green"];
+		} else if (value < scoreBounds.bad) {
+			colors = ["red"];
+		} else if (value < scoreBounds.avg) {
+			colors = ["orange"];
+		} else {
+			colors = ["green"];
+		}
+
+		return colors;
+	}
+
+	function createChart(deviceScore) {
+		Highcharts.chart("score-graph", {
+			navigation: {
+        buttonOptions: {
+            enabled: false
+        },
+			},
+			colors: calcColors(deviceScore), //["red", "orange", "green"],
+			chart: {
+				height: "100%",
+				type: "column",
+				inverted: true,
+				polar: true,
+				borderWidth: 0,
+				backgroundColor: "transparent",
+				toolbar: false,
+			},
+			title: {
+				text: "",
+			},
+			credits: {
+				enabled: false, // Disable the watermark
+			},
+			tooltip: {
+				enabled: false,
+			},
+			pane: {
+				//   size: "100%",
+				innerSize: "90%",
+				startAngle: -135,
+				endAngle: 135,
+			},
+			xAxis: {
+				tickInterval: 1,
+				gridLineWidth: 1,
+				labels: {
+					enabled: false,
+				},
+				lineWidth: 0,
+				categories: ["Score"],
+				accessibility: {
+					description: "Device Score",
+				},
+			},
+			yAxis: {
+				labels: {
+					enabled: false,
+				},
+				crosshair: {
+					enabled: false,
+				},
+				gridLineWidth: 0,
+				lineWidth: 0,
+				tickInterval: 25,
+				reversedStacks: false,
+				max: 100,
+				accessibility: {
+					description: "Device Score",
+				},
+			},
+			plotOptions: {
+				column: {
+					stacking: "normal",
+					borderWidth: 1,
+					pointPadding: 1,
+					groupPadding: 0.15,
+					dataLabels: {
+						enabled: false,
+					},
+				},
+			},
+			legend: {
+				enabled: false, // Disable the legend
+			},
+			series: calcSeries(deviceScore),
+		});
+	}
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.dh-grid-item {&#13;
+  display: grid;&#13;
+  grid-template-columns: 50% 50%;&#13;
+  align-items: center;&#13;
+  justify-items: center;&#13;
+&#13;
+  .text-container {&#13;
+    text-align: center;&#13;
+&#13;
+    p {&#13;
+      font-size:large;&#13;
+&#13;
+      &amp; span {&#13;
+        font-size: xx-large;&#13;
+&#13;
+        &amp;.good {color:$brand-success}&#13;
+        &amp;.avg {color: $brand-warning}&#13;
+        &amp;.bad {color: $brand-danger}&#13;
+      }&#13;
+    }&#13;
+  }&#13;
+&#13;
+  .imagery {&#13;
+    display: grid;&#13;
+    align-items: center;&#13;
+    justify-items: center;&#13;
+    width: 100%;&#13;
+&#13;
+    &amp;&gt;div {&#13;
+      grid-area: 1 / 1;&#13;
+    }&#13;
+&#13;
+    #score-graph {&#13;
+      width: 100%;&#13;
+    }&#13;
+&#13;
+    .graph-img-container {&#13;
+      z-index: 1;&#13;
+      width: 65%;&#13;
+      max-width: 350px;&#13;
+&#13;
+      img {&#13;
+        width: 100%;&#13;
+      }&#13;
+    }&#13;
+  }&#13;
+&#13;
+  &amp;#no-score-layout {&#13;
+    &gt; img {&#13;
+      max-width: 80%;&#13;
+      max-height: 80%;&#13;
+    }&#13;
+  }&#13;
+}&#13;
+&#13;
+.heart-rate {&#13;
+  width: 150px;&#13;
+  height: 73px;&#13;
+  position: relative;&#13;
+  margin: 20px auto;&#13;
+  scale: 200%;&#13;
+}&#13;
+&#13;
+.fade-in {&#13;
+  position: absolute;&#13;
+  width: 100%;&#13;
+  height: 100%;&#13;
+  background-color: #FFFFFF;&#13;
+  top: 0;&#13;
+  right: 0;&#13;
+  animation: heartRateIn 2.5s linear infinite;&#13;
+}&#13;
+&#13;
+.fade-out {&#13;
+  position: absolute;&#13;
+  width: 120%;&#13;
+  height: 100%;&#13;
+  top: 0;&#13;
+  left: -120%;&#13;
+  animation: heartRateOut 2.5s linear infinite;&#13;
+  background: rgba(255, 255, 255, 1);&#13;
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);&#13;
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);&#13;
+  background: -o-linear-gradient(left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);&#13;
+  background: -ms-linear-gradient(left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);&#13;
+  background: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 80%, rgba(255, 255, 255, 0) 100%);&#13;
+}&#13;
+&#13;
+@keyframes heartRateIn {&#13;
+  0% {&#13;
+    width: 100%;&#13;
+  }&#13;
+  50% {&#13;
+    width: 0;&#13;
+  }&#13;
+  100% {&#13;
+    width: 0;&#13;
+  }&#13;
+}&#13;
+&#13;
+@keyframes heartRateOut {&#13;
+  0% {&#13;
+    left: -120%;&#13;
+  }&#13;
+  30% {&#13;
+    left: -120%;&#13;
+  }&#13;
+  100% {&#13;
+    left: 0;&#13;
+  }&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data>{&#13;
+  "options": {&#13;
+    "developer_mode": "true"&#13;
+  }&#13;
+}</demo_data>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>dh_grid_item</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>DH Grid Item</name>
+        <option_schema>[{"hint":"Should the chart show a range from red to green, or a single color signifying the overall score?","name":"use_multicolor_chart","section":"Presentation","label":"Use Multicolor Chart","type":"boolean"}]</option_schema>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  
+  var dh = new DeviceHealth();
+  
+  data.userHasDevices = dh.userHasDevices();
+  data.useMultiColors = options.use_multicolor_chart == 'true'; // Should the chart show a mix of red/amber/green, or just a solid color
+  
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 12:56:02</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>99814fec93d2c3906214fe327cba1080</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>DH Grid Item</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_widget_99814fec93d2c3906214fe327cba1080</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-28 09:55:50</sys_updated_on>
+        <template><![CDATA[<div>
+  <div ng-if="c.options.developer_mode == 'true'"> <!-- Testing stuff -->
+    <div class="checkbox"><label><input type="checkbox" ng-model="c.hasDevices" ng-change="c.updateGraph(c.score)">Has devices?</label></div>
+    <div class="checkbox"><label><input type="checkbox" ng-model="c.loading" ng-change="c.updateGraph(c.score)">Loading?</label></div>
+    <div class="form-group"><label for="score">Score:</label><input type="text" class="form-control" id="score" ng-model="c.score" ng-change="c.updateGraph(c.score)"></div>
+  </div> <!-- End Testing stuff -->
+
+  <!-- Content to display when the user has no devices, or has no DEX score (make sure loading has happened before showing this) -->
+  <div id="no-score-layout" class="dh-grid-item" ng-if="!c.loading && (!c.score || !c.hasDevices)">
+    <img src="x_mukl_dh.grid_item_no_score.png" />
+    <div class="text-container">
+      <h2 ng-if="!c.hasDevices">${dh.portal.no_devices}</h2>
+      <h2 ng-if="c.hasDevices && !c.score">${dh.portal.no_score}</h2>
+      <p>${dh.portal.problem_msg}</p>
+    </div>
+  </div>
+
+  <div id="score-layout" class="dh-grid-item"
+    ng-show="c.loading || (c.score && c.hasDevices)"
+    ng-click="c.navToPage()">
+    <div class="imagery">
+      <div id="score-graph"></div>
+      <div class="graph-img-container">
+        <!-- <div class="heart-rate">
+          <svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="150px" height="73px" viewBox="0 0 150 73" enable-background="new 0 0 150 73" xml:space="preserve">
+            <polyline fill="none" stroke="#009B9E" stroke-width="3" stroke-miterlimit="10" points="0,45.486 38.514,45.486 44.595,33.324 50.676,45.486 57.771,45.486 62.838,55.622 71.959,9 80.067,63.729 84.122,45.486 97.297,45.486 103.379,40.419 110.473,45.486 150,45.486"
+            />
+          </svg>
+          <div class="fade-in"></div>
+          <div class="fade-out"></div>
+        </div> -->
+        <img src="x_mukl_dh.grid_item_laptop.png" />
+      </div>
+    </div>
+
+    <div class="text-container">
+      <h2>${dh.portal.title}</h2>
+      <p ng-if="!c.loading"><span ng-class="c.getScoreRating(c.score)">{{c.score}}</span>/{{c.maxScore}}</p>
+      <p ng-if="c.loading"><now-loader size="lg"/></p>
+    </div>
+  </div>
+</div>]]></template>
+    </sp_widget>
+</record_update>

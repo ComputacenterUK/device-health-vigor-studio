@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.dhCache</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Class to access the Device Health cache table, used to store metrics for devices and users</description>
+        <mobile_callable>false</mobile_callable>
+        <name>dhCache</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var dhCache = function dhCache() {};
+
+dhCache.prototype = {
+
+    // Table names
+    TN_CONFIG: 'x_mukl_dh_config',
+    TN_CACHE: 'x_mukl_dh_metric_cache',
+	TN_ACTIONS: 'x_mukl_dh_actions',
+
+    // Cache types
+    CT_USER: 'User',
+    CT_DEVICE: 'Device',
+    CT_AGGREGATE: 'Aggregate',
+    CT_METRIC: 'Metric',
+
+    type: 'dhCache'
+};
+
+//------------------------------------------------
+// Public property methods
+//------------------------------------------------
+
+dhCache.prototype.getDeviceRecord = function getDeviceRecord(device) {
+
+    if (!device) {
+        return null;
+    }
+
+    var cr = new GlideRecord(this.TN_CACHE);
+    cr.addQuery('type', this.CT_DEVICE);
+    cr.addQuery('asset', device.getAssetId());
+    cr.orderByDesc('date');
+    cr.query();
+
+    if (!cr.next()) {
+        return null;
+    }
+
+    return cr;
+};
+
+//------------------------------------------------
+// Public action methods
+//------------------------------------------------
+
+dhCache.prototype.getActionData = function getActionData(device) {
+
+    if (!device) {
+        return 'Device not supplied';
+    }
+    var asset_id = device.getAssetId();
+
+    var result = {
+        asset_id: asset_id,
+        action_ids: [],
+        executed_ids: []
+    };
+
+    var cr = new GlideRecord(this.TN_CACHE);
+    cr.addQuery('type', this.CT_DEVICE);
+    cr.addQuery('asset', asset_id);
+    cr.orderByDesc('date');
+    cr.query();
+
+    if (!cr.next()) {
+        return result;
+    }
+
+    result.action_ids = cr.actions.nil() ? [] : (cr.actions + '').split(',');
+    result.executed_ids = cr.ra_run_today.nil() ? [] : (cr.ra_run_today + '').split(',');
+
+    return result;
+};
+
+//------------------------------------------------
+// Internal support methods
+//------------------------------------------------
+
+dhCache.prototype.read_metrics = function read_metrics(cr, map) {
+
+    var metrics = [];
+    var field, field_name;
+
+    for (metric in map.metrics) {
+
+        var grMCache = new GlideRecord(this.TN_CACHE);
+        grMCache.addQuery('parent', cr.sys_id);
+        grMCache.addQuery('metric', metric);
+        grMCache.addQuery('date', cr.date);
+        grMCache.query();
+
+        if (grMCache.next()) {
+            metrics.push({
+                metric_id: metric + '',
+                value: grMCache[map.metrics[metric].value_type] + ''
+            });
+        }
+
+    }
+
+    return metrics;
+};
+
+dhCache.prototype.getInstanceData = function getInstanceData(instance) {
+
+    if (!instance) {
+        return 'Instance not supplied';
+    }
+
+    this.ensure_instance(instance);
+
+    var entity = instance.getEntity();
+    var entity_id = entity.getId();
+    var related_table = instance.getRelatedTable();
+    var related_id = instance.getRelatedId();
+
+    var result = {
+        entity_id: entity_id,
+        related_table: related_table,
+        related_id: related_id,
+        days: []
+    };
+
+    var cr = new GlideRecord(this.TN_CACHE);
+    cr.addQuery('entity', entity_id);
+    cr.addQuery('related_table', related_table);
+    cr.addQuery('related_item', related_id);
+    cr.orderByDesc('date');
+    cr.setLimit(entity.getMaxDays());
+    cr.query();
+
+    result.query = cr.getEncodedQuery() + '';
+    result.count = cr.getRowCount();
+
+    var map = entity.getMetricMap();
+    var day;
+
+    while (cr.next()) {
+
+        if (instance.type == 'dhDevice') {
+
+            result.device_name = cr.device_name + '';
+            result.device_uid = cr.uid + '';
+
+            result.overall_score = cr.overall_score + '';
+
+            result.available_actions = cr.actions + '';
+            result.executed_actions = cr.ra_run_today + '';
+
+        } else {
+            result.name = cr.related_item.getDisplayValue();
+
+        }
+
+        day = {
+            date: cr.date + '',
+            metrics: this.read_metrics(cr, map)
+        };
+
+        if (!cr.info.nil()) {
+            day.info = cr.info + '';
+        }
+
+        result.days.push(day);
+    }
+
+    return result;
+};
+
+dhCache.prototype.ensure_instance = function ensure_instance(instance) {
+
+    var today = new GlideDate().getValue() + '';
+
+    // Try to select today's instance
+    var cr = new GlideRecord(this.TN_CACHE);
+    cr.addQuery('entity', instance.getEntity().getId());
+    cr.addQuery('related_table', instance.getRelatedTable());
+    cr.addQuery('related_item', instance.getRelatedId());
+    cr.addQuery('date', today);
+    cr.query();
+
+    // Nothing to do if cache entry found
+    if (cr.next()) {
+        return;
+    }
+
+    var nt = new dhNexthink();
+    var data, user, device;
+
+    if (instance.type == 'dhUser') {
+
+        user = instance;
+        data = nt.retrieveUserData(user);
+
+        this.save_instance_data(user, data);
+
+    } else if (instance.type == 'dhDevice') {
+
+        user = instance.getUser();
+        data = nt.retrieveDeviceData(user);
+
+        // Save each device returned
+        data.devices.forEach(function(dev) {
+            device = user.getDevice(dev.device_name);
+            this.save_instance_data(device, dev);
+        }, this);
+
+    }
+
+};
+
+dhCache.prototype.save_instance_data = function save_instance_data(instance, data) {
+
+    var entity = instance.getEntity();
+    var entity_id = entity.getId();
+    var related_table = instance.getRelatedTable();
+    var related_id = instance.getRelatedId();
+
+    var days = data && data.days ? data.days : [];
+
+    days.forEach(function(day) {
+
+        var cr = new GlideRecord(this.TN_CACHE);
+        cr.addQuery('entity', entity_id);
+        cr.addQuery('related_table', related_table);
+        cr.addQuery('related_item', related_id);
+        if (entity.isMultiDay()) {
+            // For multi day entities we select the specific date
+            cr.addQuery('date', day.date);
+        } else {
+            // For single day entities we select the latest date
+            cr.orderByDesc('date');
+        }
+        cr.query();
+
+        // Create entry if not found
+        if (!cr.next()) {
+            cr.newRecord();
+            cr.entity = entity_id;
+            cr.related_table = related_table;
+            cr.related_item = related_id;
+        }
+
+        // Set standard details
+        cr.date = day.date;
+        cr.info = day.info || '';
+
+        // Clear available actions and execution
+        cr.actions = '';
+        cr.ra_run_today = '';
+
+        if (instance.type == 'dhUser') {
+
+            // Set USER details
+            cr.user = related_id;
+            cr.type = this.CT_USER;
+
+        } else if (instance.type == 'dhDevice') {
+
+            // Set DEVICE details
+            cr.asset = related_id;
+            cr.device_name = data.device_name;
+            cr.uid = data.device_uid;
+            cr.type = this.CT_DEVICE;
+
+        } else {
+
+            // Save instance item name
+            cr.device_name = data.item_name;
+            cr.type = this.CT_AGGREGATE;
+
+        }
+		var actionArr = [];
+		actionArr = this.get_actions(cr, null, actionArr);
+        // Set user metric fields
+        day.metrics.forEach(function(m) {
+            /*
+            	var field_name = entity.getMetric(m.metric_id).getName();
+            	cr[field_name] = m.value;*/
+
+            var grMdata = new GlideRecord(this.TN_CACHE);
+            grMdata.addQuery('metric', m.metric_id);
+            grMdata.addQuery('parent', cr.sys_id);
+            grMdata.addQuery('type', this.CT_METRIC);
+            grMdata.query();
+            if (!grMdata.next()) {
+                grMdata.newRecord();
+                grMdata.metric = m.metric_id;
+                grMdata.parent = cr.sys_id;
+                grMdata.type = this.CT_METRIC;
+            }
+
+			grMdata.date = day.date;
+            grMdata[m.value_type] = m.value;
+            grMdata.update();
+
+			var condition = "conditionLIKEmetric=" + m.metric_id;
+			actionArr = this.get_actions(grMdata, condition, actionArr);
+
+        }, this);
+
+		cr.actions = actionArr.join(',');
+        // Save the cache entry
+        cr.update();
+    }, this);
+
+};
+
+/*
+	@name             get_actions
+	@description      Using the current metric cache record and optionally a condition. This function returns an array of Action sys_id's available for the parent metric. 
+	@param            {GlideRecord} gr - Gliderecord of a metric cache
+	@param            {String} condition - Condition used to evalute available actions. Can be blank.
+	@param            {Array} actionArr - instantiated array or existing array of defined actions.
+	@returns          {Array} existing or updated array of action sys_id's to be linked to the parent metric cache.
+*/
+
+dhCache.prototype.get_actions = function get_actions(gr, condition, actionArr) {
+
+    var grAct = new GlideRecord(this.TN_ACTIONS);
+    grAct.addActiveQuery();
+    if (condition) {
+        grAct.addEncodedQuery(condition);
+    }
+    grAct.query();
+
+    while (grAct.next()) {
+        if (!grAct.condition || (grAct.condition && GlideFilter.checkRecord(gr, grAct.condition)))
+            actionArr.push(grAct.sys_id + '');
+    }
+
+    return actionArr;
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:20</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>dd697c4c9392cf506214fe327cba10f7</sys_id>
+        <sys_mod_count>38</sys_mod_count>
+        <sys_name>dhCache</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_dd697c4c9392cf506214fe327cba10f7</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-08-03 14:33:56</sys_updated_on>
+    </sys_script_include>
+</record_update>

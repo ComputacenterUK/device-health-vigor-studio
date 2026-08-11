@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_widget_dependency">
+    <m2m_sp_widget_dependency action="INSERT_OR_UPDATE">
+        <sp_dependency display_value="DH Highcharts">8b156f2c93d6c3906214fe327cba103b</sp_dependency>
+        <sp_widget display_value="DH Device Health Score">4e2183ec93d2c3906214fe327cba1021</sp_widget>
+        <sys_class_name>m2m_sp_widget_dependency</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 15:32:28</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>f855676c93d6c3906214fe327cba1087</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DH Highcharts.DH Device Health Score</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>m2m_sp_widget_dependency_f855676c93d6c3906214fe327cba1087</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 15:32:28</sys_updated_on>
+    </m2m_sp_widget_dependency>
+</record_update>

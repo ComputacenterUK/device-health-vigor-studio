@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="average_memory_usage_24h" table="x_mukl_dh_metric_cache" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>average_memory_usage_24h</element>
+            <name>x_mukl_dh_metric_cache</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-20 10:43:25</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>average_memory_usage_24h</sys_name>
+            <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+            <sys_update_name>sys_choice_x_mukl_dh_metric_cache_average_memory_usage_24h</sys_update_name>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-20 10:43:25</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>average_memory_usage_24h</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Good</label>
+            <language>en</language>
+            <name>x_mukl_dh_metric_cache</name>
+            <sequence>0</sequence>
+            <synonyms/>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-20 10:43:26</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-20 10:43:26</sys_updated_on>
+            <value>good</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>average_memory_usage_24h</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Average</label>
+            <language>en</language>
+            <name>x_mukl_dh_metric_cache</name>
+            <sequence>1</sequence>
+            <synonyms/>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-20 10:43:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-20 10:43:27</sys_updated_on>
+            <value>average</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>average_memory_usage_24h</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Poor</label>
+            <language>en</language>
+            <name>x_mukl_dh_metric_cache</name>
+            <sequence>2</sequence>
+            <synonyms/>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-20 10:43:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-20 10:43:27</sys_updated_on>
+            <value>poor</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

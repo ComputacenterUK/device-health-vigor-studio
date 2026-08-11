@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.DHAPI</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Scripts to call the Outbound Nexthink API</description>
+        <mobile_callable>false</mobile_callable>
+        <name>DHAPI</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[class DHAPI {
+  static DEXSCOREDAYS = parseInt(
+    gs.getProperty("x_mukl_dh.dex.days.shown", 7)
+  ); // Number of days to capture scores
+
+  /**
+   * Schema for query request.
+   *
+   * @typedef {Object} QryReqSchema
+   * @property {string} queryId - The ID of the query
+   * @property {Object} parameters - The parameters for the query. Initially an empty object.
+   */
+  /**
+   * Schema for response object.
+   *
+   * @typedef {Object} ResponseObject
+   * @property {Array<Object>} data - The parameters for the query. Initially an empty object.
+   */
+  /**
+   * Schema for execute remote action
+   *
+   * @typedef {Object} RemoteActionSchema
+   * @property {string} remoteActionId
+   * @property {Object} params
+   * @property {Array<string>} devices
+   */
+  /**
+   * Schema for response object.
+   *
+   * @typedef {Object} ResponseRA
+   * @property {string} requestId - UID or the remote action execution transaction.
+   * @property {Number} expiresInMinutes - expiry of remote action
+   */
+
+  /**
+   * Static schema for query requests.
+   * @type {QryReqSchema}
+   */
+  static QRYREQSCHEMA = {
+    queryId: null,
+    parameters: {},
+  };
+
+  /**
+   * @type {RemoteActionSchema}
+   */
+  static RASCHEMA = {
+    remoteActionId: "",
+    params: {},
+    devices: [],
+  };
+
+  constructor() {
+    this.NEXTHINKCOMPANY = gs.getProperty("x_mukl_dh.nexthink.company.id");
+    this.NEXTHINKREGION = gs.getProperty("x_mukl_dh.nexthink.region");
+
+    const rest_msg = "DH Nexthink";
+
+    if (!this.NEXTHINKCOMPANY || !this.NEXTHINKREGION)
+      gs.error("No nexthink API properties configured");
+
+    this.query_req = new sn_ws.RESTMessageV2(rest_msg, "ExecuteQuery");
+    this.query_req.setStringParameterNoEscape("company", this.NEXTHINKCOMPANY);
+    this.query_req.setStringParameterNoEscape("region", this.NEXTHINKREGION);
+
+    this.remote_action_req = new sn_ws.RESTMessageV2(
+      rest_msg,
+      "ExecuteRemoteAction"
+    );
+    this.remote_action_req.setStringParameterNoEscape(
+      "company",
+      this.NEXTHINKCOMPANY
+    );
+    this.remote_action_req.setStringParameterNoEscape(
+      "region",
+      this.NEXTHINKREGION
+    );
+  }
+
+  /**
+   * Standard getter function to retrieve the dex scores
+   * @returns {ResponseObject}
+   */
+  get dex_scores() {
+    // If metric cache scores exist, return those
+    const cache = DHMetricCache.checkMetricCache("DEX");
+
+    if (cache) {
+      return {
+        data: cache,
+      };
+    }
+
+    let upn = null;
+
+    try {
+      upn = DHAPIConfig.NXT_UPN();
+    } catch (e) {
+      return { status: 404, message: e.message };
+    }
+
+    let req = this.query_req;
+    let reqBody = DHAPI.QRYREQSCHEMA;
+
+    reqBody.queryId = DHAPIConfig.NXT_DEXSCORESQRYID;
+    reqBody.parameters = {
+      upn,
+    };
+
+    req.setRequestBody(JSON.stringify(reqBody));
+    const response = req.execute();
+
+    return this.handleResponse(response, req);
+  }
+
+  /**
+   * Method will retrieve the metrics for user/devices provided
+   *
+   * @param {string} user UPN of the user
+   * @param {Array<string>} devices Array of device names
+   * @returns {ResponseObject}
+   */
+  getDeviceMetrics(user, devices) {
+    //todo add metric cache check
+    const cache = DHMetricCache.checkMetricCache("Metric", devices, user);
+    if (cache) {
+      return {
+        data: cache,
+      };
+    }
+
+    let req = this.query_req;
+    let reqBody = DHAPI.QRYREQSCHEMA;
+    reqBody.queryId = DHAPIConfig.NXT_DEVICEMETRICQRYID;
+
+    reqBody.parameters.upn = user || "";
+
+    for (let i = 0; i < 5; i++) {
+      reqBody.parameters["device" + (i + 1)] =
+        devices && devices[i] ? devices[i] : "";
+    }
+
+    req.setRequestBody(JSON.stringify(reqBody));
+    const response = req.execute();
+
+    return this.handleResponse(response, req);
+  }
+
+  /**
+   *
+   * @param {string} action sys_id of the action
+   * @param {string} metric sys_id of the metric cache
+   * @returns
+   */
+  executeRemoteAction(action, metric) {
+    //get action record
+    const act = new global.GlideQuery("x_mukl_dh_actions")
+      .get(action, ["action_id", "active"])
+      .orElse(null);
+
+    if (!act.active)
+      return { status: 400, message: `Action is no longer active` };
+
+    //get device metric record
+    const d_metric = DHMetricCache.metricGQ
+      .get(metric, ["asset", "uid", "asset.sys_class_name", "asset.assigned_to"])
+      .orElse(null);
+
+    if (!d_metric)
+      return {
+        status: 400,
+        message: "Unable to find Metric record with given sys_id",
+      };
+
+    //execute RA using record NexthinkID
+    let req = this.remote_action_req;
+    let reqBody = DHAPI.RASCHEMA;
+
+    reqBody.remoteActionId = act.action_id;
+    reqBody.devices.push(d_metric.uid);
+
+    req.setRequestBody(JSON.stringify(reqBody));
+    const response = req.execute();
+
+    return this.handleResponse(response, req, {
+      action: act.sys_id,
+      ...d_metric,
+    });
+  }
+
+  /**
+   *
+   * @param {sn_ws.RESTResponseV2} response
+   * @param {sn_ws.RESTMessageV2} request
+   * @returns {ResponseObject} The processed response data.
+   */
+  handleResponse(response, request, input) {
+    const status = response.getStatusCode();
+
+    if (status != 200) return this.handleResponseError(response, request);
+
+    const data = DHMetricCache.cacheMetrics(response, request, input);
+
+    return {
+      status,
+      data,
+    };
+  }
+
+  /**
+   * Generic Error handler for response with a status that is not 200
+   * @param {sn_ws.RESTResponseV2} response
+   * @param {sn_ws.RESTMessageV2} request
+   * @returns {Object} The processed response data.
+   * @returns {Object} returns.data - The data payload from the response body.
+   */
+  handleResponseError(response, request) {
+    const resBody = response.getBody();
+    const status = response.getStatusCode();
+
+    const error = resBody ? JSON.parse(resBody) : "No response body";
+
+    let log = ["Error with DH API Request"];
+    log.push("Status: " + response.getStatusCode());
+    log.push("Endpoint: " + request.getEndpoint());
+    log.push("Response Body: \n" + resBody);
+
+    gs.error(log.join("\n"));
+
+    return {
+      status,
+      ...error,
+    };
+  }
+
+}
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:19</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>85697c4c9392cf506214fe327cba10e9</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>DHAPI</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_85697c4c9392cf506214fe327cba10e9</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-23 12:04:48</sys_updated_on>
+    </sys_script_include>
+</record_update>

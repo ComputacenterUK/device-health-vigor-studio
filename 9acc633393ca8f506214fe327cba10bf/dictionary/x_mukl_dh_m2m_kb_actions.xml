@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="13f715d493de03906214fe327cba1071" label="x_mukl_dh_m2m_Knowledge_Actions" max_length="40" name="x_mukl_dh_m2m_kb_actions" type="collection">
+        <element attributes="encode_utf8=false" label="Actions" max_length="32" name="x_mukl_dh_actions" reference="x_mukl_dh_actions" type="reference"/>
+        <element attributes="encode_utf8=false" label="Knowledge" max_length="32" name="kb_knowledge" reference="kb_knowledge" type="reference"/>
+        <index name="index">
+            <element name="kb_knowledge"/>
+        </index>
+        <index name="index2">
+            <element name="x_mukl_dh_actions"/>
+        </index>
+    </element>
+</database>

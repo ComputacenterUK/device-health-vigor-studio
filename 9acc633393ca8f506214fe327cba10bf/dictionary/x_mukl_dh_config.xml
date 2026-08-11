@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="all_tables.text_index_translations=true" db_object_id="6eeac800939e8f506214fe327cba10d9" label="Config" max_length="40" name="x_mukl_dh_config" type="collection">
+        <element choice="1" default="device" label="Metric type" max_length="40" name="metric_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Device" sequence="0" value="device"/>
+                <element inactive_on_update="false" label="User" sequence="1" value="user"/>
+            </choice>
+        </element>
+        <element attributes="serializer=com.glide.script.TranslatedTextXMLSerializer" display="true" label="Label" max_length="80" name="label" type="translated_text"/>
+        <element choice="3" default="metric" label="Config type" max_length="40" name="config_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Metric" sequence="2" value="metric"/>
+                <element inactive_on_update="false" label="Action" sequence="3" value="action"/>
+                <element inactive_on_update="false" label="System" sequence="0" value="system"/>
+                <element inactive_on_update="false" label="Entity" sequence="1" value="entity"/>
+            </choice>
+        </element>
+        <element label="System" max_length="32" name="system" reference="x_mukl_dh_config" type="reference"/>
+        <element label="Name" max_length="80" name="name" type="string"/>
+        <element attributes="encode_utf8=false" label="Entity" max_length="32" name="entity" reference="x_mukl_dh_config" reference_qual="config_type=entity^EQ" reference_qual_condition="config_type=entity^EQ" type="reference"/>
+        <element label="Related table" max_length="80" name="related_table" type="table_name"/>
+        <element label="Short description" max_length="80" name="short_description" type="string"/>
+        <element choice="1" label="Value type" max_length="40" name="value_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Floating Point Number" sequence="10" value="fpn_value"/>
+                <element inactive_on_update="false" label="String" sequence="0" value="str_value"/>
+            </choice>
+        </element>
+        <element attributes="edge_encryption_enabled=true" label="Metric unit" max_length="40" name="metric_unit" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Metric category" max_length="40" name="metric_category" type="string"/>
+        <element default="true" label="Active" max_length="255" name="active" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Entity type" max_length="40" name="entity_type" type="string">
+            <choice>
+                <element inactive_on_update="false" label="User" sequence="0" value="User"/>
+                <element inactive_on_update="false" label="Aggregate" sequence="2" value="Aggregate"/>
+                <element inactive_on_update="false" label="Device" sequence="1" value="Device"/>
+            </choice>
+        </element>
+        <element label="Max days" max_length="40" name="max_days" type="integer"/>
+        <element label="System ID" max_length="80" name="system_id" type="string"/>
+        <index name="index">
+            <element name="entity"/>
+        </index>
+        <index name="index2">
+            <element name="system"/>
+        </index>
+    </element>
+</database>

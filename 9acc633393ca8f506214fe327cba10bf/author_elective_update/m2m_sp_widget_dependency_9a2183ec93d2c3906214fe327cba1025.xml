@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_widget_dependency">
+    <m2m_sp_widget_dependency action="DELETE">
+        <sp_dependency display_value="EUA Highcharts">f0313ff79796c250f5c99924a253af75</sp_dependency>
+        <sp_widget display_value="DH Device Health Score">4e2183ec93d2c3906214fe327cba1021</sp_widget>
+        <sys_class_name>m2m_sp_widget_dependency</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 12:54:27</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>9a2183ec93d2c3906214fe327cba1025</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>EUA Highcharts.DH Device Health Score</sys_name>
+        <sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>m2m_sp_widget_dependency_9a2183ec93d2c3906214fe327cba1025</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 12:54:27</sys_updated_on>
+    </m2m_sp_widget_dependency>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</application>
+        <file_path/>
+        <instance_id>98cabcee4fc252807b9b220f0310c751</instance_id>
+        <instance_name>ven01619</instance_name>
+        <name>m2m_sp_widget_dependency_9a2183ec93d2c3906214fe327cba1025</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_widget_dependency"><m2m_sp_widget_dependency action="INSERT_OR_UPDATE"><sp_dependency display_value="EUA Highcharts">f0313ff79796c250f5c99924a253af75</sp_dependency><sp_widget display_value="DH Device Health Score">4e2183ec93d2c3906214fe327cba1021</sp_widget><sys_class_name>m2m_sp_widget_dependency</sys_class_name><sys_created_by>peter.watt</sys_created_by><sys_created_on>2026-07-22 12:54:27</sys_created_on><sys_customer_update>false</sys_customer_update><sys_id>9a2183ec93d2c3906214fe327cba1025</sys_id><sys_mod_count>0</sys_mod_count><sys_name>EUA Highcharts.DH Device Health Score</sys_name><sys_package display_value="Actionable Eco Device Health" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Actionable Eco Device Health">9acc633393ca8f506214fe327cba10bf</sys_scope><sys_update_name>m2m_sp_widget_dependency_9a2183ec93d2c3906214fe327cba1025</sys_update_name><sys_updated_by>peter.watt</sys_updated_by><sys_updated_on>2026-07-22 12:54:27</sys_updated_on></m2m_sp_widget_dependency></record_update>]]></payload>
+        <payload_hash>443350325</payload_hash>
+        <record_name>EUA Highcharts.DH Device Health Score</record_name>
+        <reverted_from/>
+        <source>52cc633393ca8f506214fe327cba10c8</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 12:54:27</sys_created_on>
+        <sys_id>1a2183ec93d2c3906214fe327cba1029</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19f89e44af80000001</sys_recorded_at>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 12:54:27</sys_updated_on>
+        <type>Widget Dependency</type>
+        <update_guid>1a2183ec97d2c39077e7bd1180fb0028</update_guid>
+        <update_guid_history>1a2183ec97d2c39077e7bd1180fb0028:443350325</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Record deleted 2026-07-23 11:36:39">553b2b74931203501a34fedcdd03d65c</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-23 10:36:39</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_db_object display_value="" name="m2m_sp_widget_dependency">m2m_sp_widget_dependency</sys_db_object>
+        <sys_id>32c90a6c94224300ad7e5e22a4a68410</sys_id>
+        <sys_metadata>9a2183ec93d2c3906214fe327cba1025</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>EUA Highcharts.DH Device Health Score</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope_delete display_value="">e547d1fba4c442beaaff218a21fdaf04</sys_scope_delete>
+        <sys_update_name>m2m_sp_widget_dependency_9a2183ec93d2c3906214fe327cba1025</sys_update_name>
+        <sys_update_version display_value="m2m_sp_widget_dependency_9a2183ec93d2c3906214fe327cba1025">1a2183ec93d2c3906214fe327cba1029</sys_update_version>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-23 10:36:39</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

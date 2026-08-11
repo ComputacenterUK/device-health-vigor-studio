@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function (DHManagerService, $timeout) {
+  var c = this;
+  c.loading = true;
+  c.scores = [];
+  c.currentScore = null;
+  c.scoreColor = null;
+  c.act_history = c.data.act_history;
+  c.act_hst_groups = Object.groupBy(c.act_history, ({ date }) => date);
+
+  // Define gradient stops - used for calculating the gradient on the chart
+  const gradientStops = [
+    { stop: 0, color: [255, 0, 0] }, // Red
+    { stop: 44, color: [204, 204, 0] }, // Yellow
+    { stop: 100, color: [0, 128, 0] }, // Green
+  ];
+
+  DHManagerService.getDexScores().then(
+    (r) => {
+      // $timeout to force a scope refresh, otherwise chart and score update at random times
+      $timeout(() => {
+        var dexScores = r?.data;
+        
+        if (dexScores) {
+					c.currentScore = Math.floor(dexScores[0]?.value) || "N/A";
+          let dexChart = createChart(dexScores, gradientStops);
+          // Use a timeout here as flexbox and highcharts don't work too well together
+          // Once the graph is drawn, it needs resizing to the current div
+          $timeout(() => {
+            dexChart.reflow();
+          }, 10);
+        }
+				
+				c.loading = false;
+      });
+    },
+    (r) => console.error(r)
+  );
+
+  // Get a score rating for the
+  c.getScoreRating = (value) => {
+    const scoreBounds = {
+      bad: 33,
+      avg: 66,
+    };
+
+    if (value < scoreBounds.bad) {
+      return "poor";
+    } else if (value < scoreBounds.avg) {
+      return "avg";
+    } else {
+      return "good";
+    }
+  };
+
+  c.getScoreColor = function (value) {
+    const textColor = getGradientPosition(value, gradientStops).color;
+    return {
+      color: "rgb(" + lightenColor(textColor, -0.8).join(",") + ")",
+      "background-color": "rgb(" + lightenColor(textColor, 0.8).join(",") + ")",
+    };
+  };
+
+  /* Functionality to generate the chart */
+  function createChart(dhScores, gradientStops) {
+    let chartOpts = {
+      // Options that we are going to pre-calculate
+      scores: [],
+      days: [],
+      color: {},
+    };
+
+    // Sort scores to be in ascending date order
+    let sortedScores = DHManagerService.sortScoresByDate(dhScores);
+    
+    chartOpts.scores = sortedScores.map((score) => {
+      return { y: parseFloat(score.value) };
+    }); // yAxis values
+    chartOpts.days = sortedScores.map((score) => score.date); // dates in the same order as their relevant chartScores
+
+    chartOpts.scores.forEach((score, idx) => {
+      const actions = c.act_hst_groups[chartOpts.days[idx]] || null; 
+
+      if (actions) {
+        score["actions"] = actions;
+        score["marker"] = {
+          enabled: true,
+        };
+      }
+    });
+
+    const { min, max } = findMinMaxYValues(chartOpts.scores);
+    const minPosition = getGradientPosition(min, gradientStops);
+    const maxPosition = getGradientPosition(max, gradientStops);
+
+    // If min and max are the same, then every value is the same on the chart and a gradient color wont work, so set single color
+    if (min === max) {
+      chartOpts.color = "rgb(" + minPosition.color.toString() + ")";
+    } else {
+      chartOpts.color = {
+        linearGradient: { x1: 0, y1: 1, x2: 0, y2: 0 },
+        stops: [],
+      };
+
+      chartOpts.color.stops = [
+        [0, "rgb(" + minPosition.color.toString() + ")"], // start
+        [1, "rgb(" + maxPosition.color.toString() + ")"], // end
+      ];
+
+      // If min position is less than avg value, and max position is more than avg, then we need to work out where avg sits so we can add orange into the middle
+      if (min < gradientStops[1].stop && max > gradientStops[1].stop) {
+        chartOpts.color.stops = [
+          chartOpts.color.stops[0],
+          [getPercentage(min, max), "yellow"],
+          chartOpts.color.stops[1],
+        ];
+      }
+    }
+
+    return Highcharts.chart("dex-chart", {
+      chart: {
+        type: "spline",
+        height: 250,
+      },
+      exporting: {
+        enabled: false,
+      },
+      legend: {
+        enabled: false,
+      },
+      credits: {
+        enabled: false, // Disable the watermark
+      },
+      title: {
+        text: "", // Remove chart title
+      },
+      xAxis: {
+        title: {
+          text: "", // Remove axis title
+        },
+        lineWidth: 0,
+        labels: {
+          style: {
+            fontSize: "small",
+          },
+          formatter: function () {
+            // Convert a date into a shorthand day
+            let date = new Date(this.value);
+            let options = { weekday: "short" };
+            let shorthandDay = date.toLocaleDateString("en-US", options);
+            return shorthandDay;
+          },
+        },
+        categories: chartOpts.days,
+      },
+      yAxis: {
+        title: {
+          text: "", // Remove axis title
+        },
+        min: -5, // Set min to be less than 0 so that the 0 line appears higher
+        max: 105, // Set min slightly less than 99 so the 99th interval isnt displayed
+        tickInterval: 10, // Matches to the Poor/Average/Good lines we want to show
+        tickPositions: [17, 49, 78],
+        startOnTick: false,
+        endOnTick: false,
+        gridLineWidth: 0,
+        labels: {
+          formatter: function () {
+            return null;
+          },
+        },
+        plotBands: [
+          {
+            from: 0,
+            to: 33,
+            color: "transparent",
+            label: {
+              text: "Poor",
+              x: -10,
+              style: {
+                color: "red",
+                fontSize: "small",
+              },
+            },
+          },
+          {
+            from: 33,
+            to: 66,
+            color: "transparent",
+            label: {
+              text: "Avg",
+              x: -10,
+              style: {
+                color: "orange",
+                fontSize: "small",
+              },
+            },
+          },
+          {
+            from: 66,
+            to: 100,
+            color: "transparent",
+            label: {
+              text: "Good",
+              x: -10,
+              style: {
+                color: "green",
+                fontSize: "small",
+              },
+            },
+          },
+        ],
+      },
+      plotOptions: {
+        series: {
+          connectNulls: true, // Connect dates that have no DEX score if they are missing
+          shadow: false,
+          lineWidth: 5,
+          marker: {
+            /* Markers on the chart used to display actions */
+            fillColor: "#FFFFFF",
+            lineWidth: 2,
+            lineColor: "grey",
+            radius: 5, // Radius of the circle
+          },
+        },
+      },
+      tooltip: {
+        /* Set these up if you want actions to appear on the chart as tooltips */
+        formatter: function () {
+          if (!this.point?.actions) return false;
+
+          var template = [];
+          template.push("<b>Actions Executed</b><br/>");
+        
+          for(var i= 0; i < this.point?.actions.length; i++) {
+            template.push(this.point?.actions[i].title+" on <b>"+this.point?.actions[i].asset+"</b>")
+          }
+
+          return template.join("<br/>");
+        },
+      },
+      series: [
+        {
+          name: "",
+          data: chartOpts.scores,
+          marker: {
+            enabled: false,
+            states: {
+              hover: {
+                enabled: false,
+              },
+            },
+          },
+          color: chartOpts.color,
+        },
+      ],
+    });
+  }
+
+  // Helper function to find the min and max y values
+  function findMinMaxYValues(scores) {
+    let min = 100;
+    let max = 0;
+
+    scores.forEach((score) => {
+      if (score.y !== null) {
+        if (score.y < min) min = score.y;
+        if (score.y > max) max = score.y;
+      }
+    });
+
+    return { min, max };
+  }
+
+  // Interpolation function
+  function interpolateColor(color1, color2, factor) {
+    const result = color1.slice();
+    for (let i = 0; i < 3; i++) {
+      result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+    }
+    return result;
+  }
+
+  // Calculate the gradient position for min and max values
+  function getGradientPosition(value, gradientStops) {
+    // Find the correct stops
+    let startStop = gradientStops[0];
+    let endStop = gradientStops[gradientStops.length - 1];
+
+    for (let i = 0; i < gradientStops.length - 1; i++) {
+      if (
+        value >= gradientStops[i].stop &&
+        value <= gradientStops[i + 1].stop
+      ) {
+        startStop = gradientStops[i];
+        endStop = gradientStops[i + 1];
+        break;
+      }
+    }
+
+    // Calculate the interpolation factor
+    const range = endStop.stop - startStop.stop;
+    const factor = (value - startStop.stop) / range;
+
+    return {
+      position: startStop.stop + factor * range,
+      color: interpolateColor(startStop.color, endStop.color, factor),
+    };
+  }
+
+  function getPercentage(min, max) {
+    // Check if min and max cross the middle color value
+    if (min <= 44 && max >= 44) {
+      let percentage = (44 - min) / (max - min);
+      return percentage;
+    }
+  }
+
+  function lightenColor(rgb, factor) {
+    return rgb.map((channel) => {
+      // Normalize the channel value to 0-1 range
+      let normalized = channel / 255;
+      // Increase the value towards 1 (255 in the original scale)
+      normalized += (1 - normalized) * factor;
+      // Convert back to 0-255 range and ensure the value is within bounds
+      return Math.min(255, Math.round(normalized * 255));
+    });
+  }
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>#dh-container {
+  display: flex;
+  column-gap: 20px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  .title {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+
+    .score {
+      padding: .8rem 1rem;
+      margin-top: 1rem;
+      border-radius: 50%;
+
+      &amp;.poor {
+        background-color: #FEE2E2;
+        color: #DC2626;
+      }
+      &amp;.avg {
+        background-color: #FEF3C7;
+        color: #D97706;
+      }
+      &amp;.good {
+        background-color: #DCFCE7;
+        color: #16A34A;
+      }
+    }
+  }
+
+  .header-chart {
+    flex: 1 0 50%;
+    min-width: 20rem;
+    padding: 0px;
+    margin: 10px;
+    
+    #loading-chart {
+      height: 28rem;
+      width: 100%;
+      // min-width: 50rem;
+      border-radius: 1rem;
+      background: #f6f7f8;
+      background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-repeat: no-repeat;
+      background-size: 100rem 28rem;
+      animation: shimmer 2s infinite linear;
+      display: none;
+
+      &amp;.loading {
+        display: block;
+      }
+    }
+  }
+}
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>dh_device_health_score</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>DH Device Health Score</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+	var dh = new DeviceHealth();
+  data.act_history = dh.getActionHistory();
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 12:54:27</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>4e2183ec93d2c3906214fe327cba1021</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>DH Device Health Score</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_widget_4e2183ec93d2c3906214fe327cba1021</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-22 15:17:26</sys_updated_on>
+        <template><![CDATA[<div class="panel panel-body">
+    <div id="dh-container">
+        <div class="header-text">
+            <div class="title">
+                <h2>${dh.portal.title}</h2>
+                <div class="score no-select" data-toggle="tooltip" data-placement="bottom" title="${dh.portal.overall_score.tooltip}"
+                    ng-style="c.getScoreColor(c.currentScore)"
+                    ng-class="c.getScoreRating(c.currentScore)"
+                    ng-show="c.currentScore">
+                        {{c.currentScore}}
+                    </div>
+            </div>
+            <p>${dh.portal.subheader}</p>
+        </div>
+        <div class="header-chart">
+            <div id="loading-chart" ng-class="{'loading': c.loading}"></div>
+            <div ng-show="!c.loading" id="dex-chart"></div>
+        </div>
+    </div>
+</div>]]></template>
+    </sp_widget>
+</record_update>

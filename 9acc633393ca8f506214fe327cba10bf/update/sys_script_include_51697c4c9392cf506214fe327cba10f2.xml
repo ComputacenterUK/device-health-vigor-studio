@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.dhInstance</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Class representing a generic instance of a Device Health entity</description>
+        <mobile_callable>false</mobile_callable>
+        <name>dhInstance</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var dhInstance = function dhInstance(related_id,entity) {
+	
+	if ( entity ) { this.entity = entity; }
+	
+	this.related_id    = related_id;
+	
+	this.days = [];
+};
+
+dhInstance.prototype = {
+	
+	type: 'dhInstance'
+};
+
+//------------------------------------------------
+// Public property methods
+//------------------------------------------------
+
+dhInstance.prototype.getRelatedTable = function getRelatedTable() {
+	return this.getEntity().getRelatedTable();
+};
+
+dhInstance.prototype.getRelatedId = function getRelatedId() {
+	return this.related_id;
+};
+
+dhInstance.prototype.getRelatedRecord = function getRelatedRecord() {
+	
+	if ( this._record ) { return this._record; }
+	
+	var rr = new GlideRecord(this.getRelatedTable());
+	rr.get(this.getRelatedId());
+	
+	if ( !rr.isValidRecord() ) { return null; }
+	
+	this._record = rr;
+	
+	return this._record;
+};
+
+dhInstance.prototype.getEntity = function getEntity() {
+	
+	if ( this.entity ) { return this.entity; }
+	
+	this.entity = dhEntity.getDeviceEntity();
+	
+	return this.entity;
+};
+
+dhInstance.prototype.getName = function getName() {
+	return this.getCache().name || '';
+};
+
+dhInstance.prototype.getDayData = function getDayData() {
+	return this.days || [];
+};
+
+dhInstance.prototype.getDays = function getDays() {
+	return this.getCache().days || [];
+};
+
+dhInstance.prototype.toString = function toString() {
+	return this.type + ' "' + this.getName() + '" [' + this.getRelatedTable() + ':' + this.getRelatedId() + ']';
+};
+
+//------------------------------------------------
+// Public access methods
+//------------------------------------------------
+
+dhInstance.prototype.getMetricItems = function getMetricItems(category) {
+	
+	var resp = {
+		name     : this.getName(),
+		date     : '',
+		metrics  : [],
+	};
+	
+	// Generate response for the latest day
+	var day = this.getDays()[0];
+
+	gs.info(JSON.stringify(this.getDays(), null, 2));
+	
+	if ( !day || !day.metrics.length ) {
+		resp.error = 'No data collected for this item';
+		return resp;
+	}
+	
+	resp.date = day.date;
+	
+	var entity = this.getEntity();
+	
+	// Prepare response
+	day.metrics.forEach(function(m) {
+		
+		var metric = entity.getMetric(m.metric_id);
+		
+		// If a category was supplied, filter out non matching metrics
+		if ( category && category != metric.getCategory() ) { return; }
+		
+		var item = {
+			name     : metric.getName(),
+			label    : metric.getLabel(),
+			category : metric.getCategory(),
+			unit     : metric.getUnit(),
+			value    : m.value
+		};
+		
+		resp.metrics.push(item);
+	});
+	
+	return resp;
+};
+
+dhInstance.prototype.getMetricValues = function getMetricValues(category) {
+	
+	var resp = {
+		values : {}
+	};
+	
+	// Generate response for the latest day
+	var day    = this.getDays()[0];
+	
+	if ( !day || !day.metrics.length ) {
+		resp.error = 'No data collected for this item';
+		return resp;
+	}
+	
+	resp.date = day.date;
+	
+	var entity = this.getEntity();
+	
+	// Prepare response
+	day.metrics.forEach(function(m) {
+		
+		var metric = entity.getMetric(m.metric_id);
+		
+		// If a category was supplied, filter out non matching metrics
+		if ( category && category != metric.getCategory() ) { return; }
+		
+		var name = metric.getName();
+		var val  = m.value;
+		
+		resp.values[name] = val;
+	});
+	
+	return resp;
+};
+
+//------------------------------------------------
+// Internal support methods
+//------------------------------------------------
+
+dhInstance.prototype.getCache = function getCache() {
+	
+	if ( this.cache ) { return this.cache; }
+	
+	this.cache = new dhCache().getInstanceData(this);
+	
+	return this.cache;
+};
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:20</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>51697c4c9392cf506214fe327cba10f2</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>dhInstance</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_51697c4c9392cf506214fe327cba10f2</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-29 11:01:59</sys_updated_on>
+    </sys_script_include>
+</record_update>

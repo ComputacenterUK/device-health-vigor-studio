@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard_widget">
+    <par_dashboard_widget action="INSERT_OR_UPDATE">
+        <canvas display_value="">1915fcef935e03901a34fedcdd03d655</canvas>
+        <component display_value="Filter">226449101138d0dff1abe0e1566c8b2a</component>
+        <component_props>{"filterId":"1jurrfor0ao2veriu8t","filterName":"Timeframe","filterCustomId":"","filterComponentType":"date","datasource":{},"targets":[{"type":"table","payload":{"field":"date","applyToHierarchy":true,"table":"x_mukl_dh_metric_cache","primaryKey":"sys_id"}},{"type":"table","payload":{"field":"sys_created_on","applyToHierarchy":true,"table":"sp_log","primaryKey":"sys_id"}}],"allowedDateRanges":[{"range":"SN_DYNAMIC_DATERANGE__YESTERDAY","label":"Yesterday"},{"range":"SN_DYNAMIC_DATERANGE__TODAY","label":"Today"},{"range":"SN_DYNAMIC_DATERANGE__THIS_YEAR","label":"This year"},{"range":"SN_DYNAMIC_DATERANGE__THIS_WEEK","label":"This week"},{"range":"SN_DYNAMIC_DATERANGE__THIS_MONTH","label":"This month"},{"range":"SN_DYNAMIC_DATERANGE__LAST_WEEK","label":"Last week"},{"range":"SN_DYNAMIC_DATERANGE__LAST_MONTH","label":"Last month"}],"defaultSelectedItems":[],"defaultSelectedDateRange":{"range":""},"dateFilterView":"calendar-reldates","sort":"ASC","filterElementType":"pill","isShowSelectedValueInPill":true,"filterElementLayout":"vertical","enableClearFilter":true,"primaryActionLabel":"Apply","maxElements":500,"filterConfigurations":"@state.parFilters","cascadeScope":"c515fcef935e03901a34fedcdd03d651","isDashboard":true,"isGroup":false,"value":[]}</component_props>
+        <h>5</h>
+        <name/>
+        <stored_component/>
+        <sys_class_name>par_dashboard_widget</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-31 10:31:24</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_id>e2b6fca3939e03901a34fedcdd03d698</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>par_dashboard_widget_e2b6fca3939e03901a34fedcdd03d698</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-31 10:58:15</sys_updated_on>
+        <visualization/>
+        <w>48</w>
+        <widget_props/>
+        <x>0</x>
+        <y>0</y>
+    </par_dashboard_widget>
+</record_update>

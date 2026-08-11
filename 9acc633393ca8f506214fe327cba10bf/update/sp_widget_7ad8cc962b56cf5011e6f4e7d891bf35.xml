@@ -1,0 +1,889 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function (DHManagerService, $scope, $http, snAnalytics, $timeout) {
+  /**
+   * TODO: Move specific Eco Logc into it's own factory/service
+   * 1. Get Eco score
+   * 2. Get country aggregates
+   * 3. processing responses of HTTP calls
+   * 4. Metric Comparisons
+   */
+
+  var c = this;
+  var headlineStats = [
+    "total_energy_consumption",
+    "total_co2_emitted",
+  ];
+
+  c.loadingCountryMetrics = true;
+  c.loading = true;
+  c.countryMetrics = null;
+  c.actions = null;
+  c.ecoMetrics = null;
+  c.eco_score = null;
+  c.metricComparison = null;
+  $scope.countryCollapsed = false;
+
+  snAnalytics.startPage("dh_my_green_it", "My Green IT");
+
+  DHManagerService.getMetrics().then(() => {
+    $http.get("/api/x_mukl_dh/dh/eco-score").then(function (response) {
+      $timeout(() => {
+        c.eco_score = response?.data.score || null;
+      }, 500);
+    });
+  });
+
+  // Helper function to calculate metrics when both are available
+  c.calculateMetricComparison = function () {
+    if (!c.countryMetrics || !c.devices || c.metricComparison !== null) return;
+
+    c.metricComparison = {};
+
+    Object.keys(c.devices).forEach((assetId) => {
+      const device = c.devices[assetId];
+
+      if (!device.metrics) return;
+      const comparison = {};
+
+      device.metrics.forEach((metric) => {
+        const countryMetric = c.countryMetrics.metrics.find(
+          (m) => m.name === metric.name,
+        );
+
+        if (countryMetric) {
+          const userValue = parseFloat(metric.value);
+          const countryValue = parseFloat(countryMetric.value);
+          const difference = userValue - countryValue;
+          const percentDifference = ((difference / countryValue) * 100).toFixed(
+            0,
+          );
+
+          comparison[metric.name] = {
+            percentDifference: percentDifference,
+            isOver: difference > 0,
+          };
+        }
+        c.metricComparison[device.asset_id] = comparison;
+      });
+    });
+  };
+
+  //retrieve eco aggregates
+  $http.get("/api/x_mukl_dh/dh/country-metrics").then(function (response) {
+    c.countryMetrics = response.data.data;
+    c.calculateMetricComparison();
+    c.loadingCountryMetrics = false;
+  });
+
+  //TODO: we could remove this ion the future as the backend can now be targetted to ask specifically for ECO or Performance metrics and actions
+  $scope.$watch(
+    () => {
+      return DHManagerService.state.assetDetails;
+    },
+    (newVal) => {
+      if (!newVal) return;
+
+      c.loading = true;
+
+      for (let key in newVal) {
+        const item = newVal[key];
+
+        item.metrics = c.getEcoMetrics(item.metrics);
+        item.actions = c.getEcoActions(item.actions);
+
+        item.headlinestats = newVal[key]?.metrics?.filter((m, i) => {
+          return headlineStats.includes(m.name);
+        });
+      }
+
+      c.devices = newVal;
+      c.calculateMetricComparison();
+      c.loading = false;
+    },
+  );
+
+  $scope.$watch(
+    () => {
+      return DHManagerService.state.selectedAsset;
+    },
+    (newVal) => {
+      if (!newVal) return;
+      c.selectedAsset = newVal;
+    },
+  );
+
+  c.getEcoMetrics = function (metrics) {
+    if (!metrics.length) return null;
+
+    const ecoMetrics = metrics.filter((m) => {
+      return m.category == "ECO";
+    });
+
+    return ecoMetrics;
+  };
+
+  c.getEcoActions = function (actions) {
+    if (!actions.length) return null;
+
+    return actions.filter((a) => {
+      return a.category == "ECO";
+    });
+  };
+
+  c.isNotHeadline = function (item) {
+    return !headlineStats.some(
+      (stat) => stat.toLowerCase() === item.name.toLowerCase(),
+    );
+  };
+
+  c.valParse = function (val) {
+    return parseFloat(val).toFixed(1);
+  };
+
+  c.executeAction = async function (device, action) {
+    device.executeAction(action);
+  };
+
+  c.getIcon = function (action) {
+    switch (action.type) {
+      case "remote_action":
+        return "fa-medkit";
+      case "url":
+      case "page":
+        return "fa-external-link";
+      case "client_script":
+        return "fa-cogs";
+      case "server_script":
+        return "fa-cogs";
+      default:
+        return "fa-arrow-right";
+    }
+  };
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.actions-container {&#13;
+  grid-auto-columns: 1fr;&#13;
+  display: inline-grid;&#13;
+  position: relative;&#13;
+  overflow-x: auto;&#13;
+  width: 100%;&#13;
+  gap: 1rem;&#13;
+  padding: 0 2rem 2rem 2rem;&#13;
+&#13;
+  @media (min-width: $screen-sm-min) {&#13;
+    grid-template-columns: repeat(3, 1fr);&#13;
+  }&#13;
+}&#13;
+&#13;
+.stats {&#13;
+  grid-auto-columns: 1fr;&#13;
+  display: inline-grid;&#13;
+  position: relative;&#13;
+  overflow-x: auto;&#13;
+  width: 100%;&#13;
+  padding: 2rem;&#13;
+  gap: 1.33rem;&#13;
+&#13;
+  @media (min-width: $screen-sm-min) {&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+  }&#13;
+&#13;
+  @media (min-width: $screen-md-min) {&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+  }&#13;
+&#13;
+  &amp;.country-stats {&#13;
+    @media (min-width: $screen-md-min) {&#13;
+      grid-template-columns: repeat(3, 1fr);&#13;
+    }&#13;
+  }&#13;
+&#13;
+  .stat {&#13;
+    grid-template-columns: repeat(1, 1fr);&#13;
+    column-gap: 1rem;&#13;
+    width: 100%;&#13;
+    padding-block: 2rem;&#13;
+    padding-inline: 2rem;&#13;
+    display: inline-grid;&#13;
+    border-radius: $border-radius-large;&#13;
+    background-color: var(--bg-dynamic);&#13;
+&#13;
+    .stat-figure {&#13;
+      grid-row: 1 / span 3;&#13;
+      grid-column-start: 2;&#13;
+      place-self: center flex-end;&#13;
+    }&#13;
+&#13;
+    .stat-title {&#13;
+      font-size: $font-size-small;&#13;
+      white-space: nowrap;&#13;
+      grid-column-start: 1;&#13;
+      color: $text-secondary;&#13;
+    }&#13;
+&#13;
+    .stat-value {&#13;
+      white-space: nowrap;&#13;
+      grid-column-start: 1;&#13;
+      font-size: $font-size-xxl;&#13;
+      font-weight: 800;&#13;
+      padding-block: 1rem;&#13;
+    }&#13;
+&#13;
+    .stat-desc {&#13;
+      white-space: nowrap;&#13;
+      color: $text-tertiary;&#13;
+      grid-column-start: 1;&#13;
+      font-size: $font-size-small;&#13;
+&#13;
+      i {&#13;
+        margin-right: 0.66rem;&#13;
+      }&#13;
+    }&#13;
+  }&#13;
+}&#13;
+&#13;
+.text-primary {&#13;
+  color: $brand-primary-darker;&#13;
+}&#13;
+&#13;
+.text-danger {&#13;
+  color: $brand-danger-darker !important;&#13;
+}&#13;
+.text-success {&#13;
+  color: $brand-success-darker !important;&#13;
+}&#13;
+&#13;
+.leaf-fill {&#13;
+  fill: $brand-success-darker; /* green */&#13;
+  transition:&#13;
+    height 1s ease-in,&#13;
+    y 1s ease-in;&#13;
+}&#13;
+&#13;
+.divider {&#13;
+  white-space: nowrap;&#13;
+  height: 1rem;&#13;
+  margin: 0.66rem 0;&#13;
+  --divider-color: lighten($text-muted, 33%);&#13;
+  flex-direction: row;&#13;
+  align-self: stretch;&#13;
+  align-items: center;&#13;
+  display: flex;&#13;
+&#13;
+  &amp;:before,&#13;
+  &amp;:after {&#13;
+    content: "";&#13;
+    background-color: var(--divider-color);&#13;
+    flex-grow: 1;&#13;
+    width: 100%;&#13;
+    height: 0.125rem;&#13;
+  }&#13;
+&#13;
+  &amp;:not(:empty) {&#13;
+    gap: 1rem;&#13;
+    padding: 0 2rem;&#13;
+  }&#13;
+}&#13;
+&#13;
+.headline-stats {&#13;
+  display: flex;&#13;
+  flex-wrap: wrap;&#13;
+  gap: 3rem;&#13;
+  align-items: stretch;&#13;
+  justify-content: center;&#13;
+  padding: 2rem;&#13;
+  width: 100%;&#13;
+&#13;
+  .headline-stat {&#13;
+    width: 250px;&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    gap: 1rem;&#13;
+&#13;
+    .stat-title {&#13;
+      flex: 1;&#13;
+      text-align: center;&#13;
+      width: 100%;&#13;
+      display: flex;&#13;
+      flex-direction: column;&#13;
+      align-items: center;&#13;
+      justify-content: center;&#13;
+      height: 100%;&#13;
+&#13;
+      .title {&#13;
+        flex: 1;&#13;
+        text-align: center;&#13;
+        width: 100%;&#13;
+        display: flex;&#13;
+        flex-direction: column;&#13;
+        align-items: center;&#13;
+        justify-content: center;&#13;
+        height: 100%;&#13;
+        margin: 0;&#13;
+      }&#13;
+      small {&#13;
+        color: $text-muted;&#13;
+        font-size: $font-size-small;&#13;
+      }&#13;
+    }&#13;
+    .value {&#13;
+      display: flex;&#13;
+      border-radius: 8px;&#13;
+      background-color: var(--bg-dynamic);&#13;
+      width: 100%;&#13;
+      align-items: center;&#13;
+      justify-content: space-between;&#13;
+      padding: 2rem;&#13;
+      gap: 1rem;&#13;
+      font-weight: 800;&#13;
+      flex: 1;&#13;
+&#13;
+      .stat-value {&#13;
+        font-size: $font-size-xxl;&#13;
+      }&#13;
+    }&#13;
+&#13;
+    .description {&#13;
+      color: $text-muted;&#13;
+      font-size: $font-size-small;&#13;
+      text-align: center;&#13;
+      display: flex;&#13;
+      gap: 0.66rem;&#13;
+      place-items: center;&#13;
+    }&#13;
+  }&#13;
+}&#13;
+&#13;
+.nav.nav-tabs {&#13;
+  border-bottom: 1px solid #dadde2;&#13;
+  margin: 0 2rem -2px 2rem;&#13;
+  transition: all 0.3s ease-in-out;&#13;
+&#13;
+  &amp;.loading {&#13;
+    min-height: 2rem !important;&#13;
+  }&#13;
+&#13;
+  li {&#13;
+    background-color: rgba(0, 0, 0, 0.05);&#13;
+    border-top-right-radius: $panel-border-radius;&#13;
+    border-top-left-radius: $panel-border-radius;&#13;
+    overflow: hidden;&#13;
+    color: $text-muted;&#13;
+    margin-right: 0.33rem;&#13;
+    width: 100%;&#13;
+    &#13;
+    @media (min-width: $screen-sm-min) {&#13;
+      width: auto;&#13;
+    }&#13;
+&#13;
+    a {&#13;
+      border: 0 !important;&#13;
+      margin: 0;&#13;
+      display: flex;&#13;
+      flex-direction: column;&#13;
+      padding: 2rem 1.33rem;&#13;
+&#13;
+      .title {&#13;
+        font-weight: bold;&#13;
+        font-size: $font-size-base;&#13;
+      }&#13;
+      small {&#13;
+        font-size: $font-size-small;&#13;
+      }&#13;
+&#13;
+      &amp;:hover {&#13;
+        color: $brand-primary !important;&#13;
+      }&#13;
+    }&#13;
+&#13;
+    &amp;.active {&#13;
+      border: 1px solid $border-tertiary;&#13;
+      border-bottom-width: 0 !important;&#13;
+      margin-bottom: 0;&#13;
+&#13;
+      a {&#13;
+        background-color: $panel-bg;&#13;
+        border-bottom-width: 0px !important;&#13;
+        color: $brand-primary !important;&#13;
+        border-color: $border-tertiary !important;&#13;
+      }&#13;
+    }&#13;
+  }&#13;
+}&#13;
+&#13;
+.tab-content {&#13;
+  .tab-pane {&#13;
+    transition: all 0.3s ease-in-out;&#13;
+&#13;
+    .tab-title {&#13;
+      font-weight: bold;&#13;
+      margin: 0;&#13;
+      padding: 1rem 2rem;&#13;
+    }&#13;
+  }&#13;
+}&#13;
+&#13;
+.loading {&#13;
+  min-height: 10rem;&#13;
+  width: 100%;&#13;
+  border-radius: 1rem;&#13;
+  background-image: linear-gradient(&#13;
+    to right,&#13;
+    #f6f7f8 0%,&#13;
+    #edeef1 20%,&#13;
+    #f6f7f8 40%,&#13;
+    #f6f7f8 100%&#13;
+  );&#13;
+  background-repeat: no-repeat;&#13;
+  background-size: 100rem 28rem;&#13;
+  animation: shimmer 2s infinite linear;&#13;
+}&#13;
+&#13;
+@keyframes shimmer {&#13;
+  0% {&#13;
+    background-position: -1000px 0;&#13;
+  }&#13;
+&#13;
+  100% {&#13;
+    background-position: 1000px 0;&#13;
+  }&#13;
+}&#13;
+&#13;
+#leafFill {&#13;
+  animation: fillUp 4s ease-out forwards;&#13;
+}&#13;
+&#13;
+@keyframes fillUp {&#13;
+  from {&#13;
+    height: 0;&#13;
+    y: 420; /* Bottom of leaf */&#13;
+  }&#13;
+  to {&#13;
+    height: 60;&#13;
+    y: 360; /* Top of leaf */&#13;
+  }&#13;
+}&#13;
+&#13;
+.card {&#13;
+  border-radius: $border-radius;&#13;
+  outline-offset: 2px;&#13;
+  outline: 0 solid transparent;&#13;
+  flex-direction: column;&#13;
+  transition: outline 0.2s ease-in-out;&#13;
+  display: flex;&#13;
+  position: relative;&#13;
+  min-width: 25%;&#13;
+}&#13;
+&#13;
+.card .card-body {&#13;
+  font-size: $font-size-base;&#13;
+  padding: 1.33rem;&#13;
+  //font-weight: 600;&#13;
+  flex-direction: column;&#13;
+  flex: auto;&#13;
+  gap: 0.5rem;&#13;
+  display: flex;&#13;
+  background-color: rgba($brand-primary-lighter, 0.1);&#13;
+  box-shadow: $sp-panel-box-shadow;&#13;
+&#13;
+  &gt; p {&#13;
+    flex: 1;&#13;
+  }&#13;
+}&#13;
+&#13;
+.card .card-title {&#13;
+  align-items: center;&#13;
+  gap: 0.5rem;&#13;
+  font-weight: 900 !important;&#13;
+  display: flex;&#13;
+&#13;
+  h1,&#13;
+  h2,&#13;
+  h3,&#13;
+  h4,&#13;
+  h5 {&#13;
+    font-weight: 900 !important;&#13;
+  }&#13;
+}&#13;
+&#13;
+.card .card-actions {&#13;
+  flex-wrap: wrap;&#13;
+  align-items: flex-start;&#13;
+  gap: 0.5rem;&#13;
+  display: flex;&#13;
+  justify-content: flex-end;&#13;
+}&#13;
+&#13;
+.country-eco-container {&#13;
+  h3 {&#13;
+    padding: 1rem 2rem;&#13;
+  }&#13;
+}&#13;
+&#13;
+.eco-score {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 2rem;&#13;
+  margin-bottom: 3rem;&#13;
+&#13;
+  .eco-leaf {&#13;
+    display: grid;&#13;
+    align-content: center;&#13;
+&#13;
+    .leaf-fill {&#13;
+      transition:&#13;
+        height 1s cubic-bezier(0.23, 1, 0.32, 1),&#13;
+        y 1s cubic-bezier(0.23, 1, 0.32, 1);&#13;
+      fill: $brand-success !important;&#13;
+    }&#13;
+&#13;
+    svg {&#13;
+      width: 12rem;&#13;
+      height: auto;&#13;
+&#13;
+      /* Tablet (Small devices, 768px and up) */&#13;
+      @media (min-width: $screen-sm-min) {&#13;
+        width: 18rem;&#13;
+      }&#13;
+&#13;
+      path {&#13;
+        stroke: $brand-success-darker;&#13;
+      }&#13;
+    }&#13;
+  }&#13;
+&#13;
+  .eco-score-number {&#13;
+    h5 {&#13;
+      font-size: 2rem;&#13;
+      color: $text-muted;&#13;
+      margin: 0;&#13;
+    }&#13;
+    .score {&#13;
+      font-size: 9rem;&#13;
+      font-weight: 900;&#13;
+      color: $brand-primary;&#13;
+    }&#13;
+    .out-of {&#13;
+      color: $text-muted;&#13;
+      font-size: 4.33rem;&#13;
+    }&#13;
+  }&#13;
+}&#13;
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>dh_my_green_it</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  const leafFill = element[0].querySelector("#leafClip");
+  const scoreDisplay = element[0].querySelector("#scoreDisplay");
+  const originalY = 352.304;
+  const maxHeight = 45;
+
+  function updateLeafFill(percentage) {
+    const fillHeight = (percentage / 100) * maxHeight;
+    const newY = originalY + (maxHeight - fillHeight);
+
+    leafFill.setAttribute("y", newY);
+    leafFill.setAttribute("height", fillHeight);
+  }
+
+  function countUpEased(element, start, end, duration) {
+    const range = end - start;
+    const startTime = Date.now();
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 5); // Slower at the end
+    }
+
+    function update() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeOutCubic(progress);
+      const current = start + range * easedProgress;
+
+      element.textContent = Math.round(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  const unwatch = scope.$watch(
+    () => controller.eco_score,
+    (nval) => {
+      if (!nval) return;
+      
+      updateLeafFill(nval);
+      countUpEased(scoreDisplay, 0, nval, 1800);
+
+      unwatch();
+    },
+  );
+}
+]]></link>
+        <name>DH My Green IT</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-27 09:58:36</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>7ad8cc962b56cf5011e6f4e7d891bf35</sys_id>
+        <sys_mod_count>10</sys_mod_count>
+        <sys_name>DH My Green IT</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_widget_7ad8cc962b56cf5011e6f4e7d891bf35</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-28 09:56:53</sys_updated_on>
+        <template><![CDATA[<div class="eco-score-container">
+  <h1>${My Green IT}</h1>
+  <div class="eco-score">
+    <div class="eco-leaf">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="5 0 45 60"
+        width="60"
+        height="60"
+      >
+        <defs>
+          <clipPath id="clip-0">
+            <path
+              d="M 858.071 394.337 C 864.795 398.061 878.688 397.409 885.349 390.749 C 895.769 380.328 894.657 363.834 893.703 357.243 C 893.448 355.48 892.1 354.132 890.336 353.876 C 883.746 352.922 867.251 351.811 856.83 362.233 C 848.041 371.023 847.299 384.533 855.174 392.407 C 855.438 392.671 855.707 392.924 855.983 393.168 L 858.071 394.337 Z"
+              stroke="#49494D"
+              stroke-width="2.00001"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              fill="none"
+            >
+              <title>leafOutline</title>
+            </path>
+          </clipPath>
+        </defs>
+        <g transform="translate(-879 -363)">
+          <rect
+            x="848.825"
+            y="397.304"
+            width="46"
+            height="0"
+            style="
+              stroke: rgb(0, 0, 0);
+              stroke-width: 0px;
+              transform-origin: -0.995093px 374.094px;
+              clip-path: url(&quot;#clip-0&quot;);
+            "
+            transform="matrix(1, 0, -0.000051, 1, 36.995092, 13.906415)"
+            id="leafClip"
+            class="leaf-fill"
+          >
+            <title>clipRect</title>
+          </rect>
+          <path
+            d="M924.247 374.234C917.949 378.361 890.234 398.376 890.234 418.803"
+            stroke="#49494D"
+            stroke-width="2.00001"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          >
+            <title>stem</title>
+          </path>
+          <path
+            d="M903.272 376.58C903.272 376.58 900.797 383.389 902.654 392.055"
+            stroke="#49494D"
+            stroke-width="2.00001"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          >
+            <title>vein1</title>
+          </path>
+          <path
+            d="M925.42 384.79C925.42 384.79 919.301 381.866 913.691 382.547"
+            stroke="#49494D"
+            stroke-width="2.00001"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          >
+            <title>vein2</title>
+          </path>
+          <path
+            d="M910.857 401.243C910.857 401.243 903.429 400.005 896.62 401.862"
+            stroke="#49494D"
+            stroke-width="2.00001"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          >
+            <title>vein3</title>
+          </path>
+          <path
+            d="M 895.065 408.243 C 901.789 411.967 915.682 411.315 922.343 404.655 C 932.764 394.234 931.653 377.74 930.699 371.149 C 930.444 369.386 929.096 368.038 927.332 367.782 C 920.742 366.828 904.247 365.717 893.826 376.139 C 885.036 384.929 884.294 398.439 892.168 406.313 C 892.432 406.577 892.701 406.830 892.977 407.074 L 895.065 408.243 Z"
+            stroke="#49494D"
+            stroke-width="2.00001"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+            id="leafOutline"
+          >
+            <title>leafOutline</title>
+          </path>
+        </g>
+      </svg>
+    </div>
+    <div class="eco-score-number">
+      <h5>${Eco Score}</h5>
+      <span class="score" id="scoreDisplay">0</span>
+      <span class="out-of">/100</span>
+    </div>
+  </div>
+</div>
+
+<div class="main-content">
+  <ul class="nav nav-tabs" role="tablist">
+    <li
+      ng-repeat="(key, device) in c.devices track by key"
+      ng-class="{'active': key == c.selectedAsset}"
+    >
+      <a role="tab" data-toggle="tab" ng-href="#device-{{key}}">
+        <span class="title">{{device.asset_model}}</span>
+        <small>{{device.name}}</small>
+      </a>
+    </li>
+  </ul>
+  <div
+    class="tab-content panel panel-default"
+    ng-class="{'loading': c.loading}"
+  >
+    <div
+      role="tabpanel"
+      ng-repeat="(key, device) in c.devices track by key+'content'"
+      class="tab-pane fade"
+      ng-class="{'in active': key == c.selectedAsset}"
+      id="device-{{key}}"
+      ng-hide="c.loading"
+    >
+      <div ng-if="!device.error && device.metrics.length > 0">
+        <div class="headline-stats">
+          <div
+            class="headline-stat"
+            ng-repeat="stat in device.headlinestats | orderBy: ['-unit','name']"
+            ng-include="'dh-headline-stat.html'"
+          ></div>
+        </div>
+        <div class="divider">
+          <h5>
+            ${Breakdown} <small> ${over 30 days}</small>
+          </h5>
+        </div>
+        <div class="stats">
+          <div
+            ng-repeat="metric in device.metrics | filter:c.isNotHeadline | orderBy: ['-unit','name'] track by metric.name"
+            class="stat"
+            ng-class="c.metricComparison[device.asset_id][metric.name].isOver ? 'text-danger' : 'text-success'"
+            style="--bg-dynamic: rgb(from currentColor r g b / 0.08);"
+            ng-include="'dh-stat.html'"
+          ></div>
+        </div>
+        <h3 class="tab-title">${Recommended Actions}</h3>
+        <div class="actions-container">
+          <div
+            ng-repeat="action in device.actions track by action.sys_id"
+            class="card"
+          >
+            <div class="card-body">
+              <div class="card-title"><h4>{{action.title}}</h4></div>
+              <p>{{action.short_description}}</p>
+              <div class="card-actions">
+                <button
+                  class="btn btn-primary"
+                  ng-click="c.executeAction(device, action)"
+                  ng-disabled="action.run_today || action.running"
+                >
+                  {{action.action_text}}
+                  <i
+                    class="fa fa-cog fa-spin fa-fw"
+                    ng-show="action.running"
+                  ></i>
+                  <i
+                    class="fa fa-check"
+                    aria-hidden="true"
+                    ng-show="action.run_today"
+                  ></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div ng-if="device.error || device.metrics.length == 0">
+        <p ng-if="device.error" class="tab-title">{{device.error}}</p>
+        <p ng-if="device.metrics.length == 0" class="tab-title">
+          ${No Eco metrics recorded for this device}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="country-eco-container panel panel-default"
+    ng-if="c.countryMetrics.metrics.length > 0"
+  >
+    <h3 ng-click="countryCollapsed = !countryCollapsed">
+      {{c.countryMetrics.name}} ${Averages}<small> ${over 30 days}</small>
+    </h3>
+    <div
+      class="stats country-stats"
+      ng-class="{'loading': c.loadingCountryMetrics}"
+      id="country-stats"
+      uib-collapse="countryCollapsed"
+    >
+      <div
+        ng-repeat="metric in c.countryMetrics.metrics | orderBy: ['-unit','name'] track by $index"
+        class="stat text-primary"
+        style="--bg-dynamic: rgb(from currentColor r g b / 0.033);"
+      >
+        <div class="stat-title">{{metric.label}}</div>
+        <div class="stat-value">
+          {{c.valParse(metric.value)}} {{metric.unit}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<now-message
+  key="dh.action.remote.one_time.title"
+  value="${dh.action.remote.one_time.title}"
+></now-message>
+<now-message
+  key="dh.action.remote.one_time"
+  value="${dh.action.remote.one_time}"
+></now-message>
+]]></template>
+    </sp_widget>
+</record_update>

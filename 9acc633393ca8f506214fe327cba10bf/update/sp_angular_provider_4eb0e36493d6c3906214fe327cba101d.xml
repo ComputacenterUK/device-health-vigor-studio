@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_angular_provider">
+    <sp_angular_provider action="INSERT_OR_UPDATE">
+        <name>DHManagerService</name>
+        <script><![CDATA[function DHManagerService(DHApiFactory, DHDeviceFactory) {
+	const api = DHApiFactory();
+	const state = {
+		dex_score: null,
+		selectedAsset: null,
+		assetsLoading: null,
+		assetDetails: null,
+	};
+
+	Object.seal(state);
+
+	this.state = state;
+
+	this.setSelectedAsset = function (assetID) {
+		state.selectedAsset = assetID;
+	};
+
+	this.getSelectedAssetInfo = function () {
+
+		if(!state.selectedAsset || !state.assetDetails) return null;
+
+		return state.assetDetails[state.selectedAsset] || null;
+	};
+
+	/**
+   * Retrieve the DEX scores for a user
+   * @returns {Promise}
+   */
+	this.getDexScores = async function getDexScores() {
+		if (state.dex_score) return state.dex_score;
+
+		return state.dex_score = await api.getDexScores();
+	};
+
+	/**
+   * @param {array} devices - array of objects with CI name and related asset sys ID
+   */
+	this.getMetrics = async function getMetrics() {
+		console.time("getMetrics");
+		state.assetsLoading = true;
+		state.assetDetails = null;
+
+		let assetMap = {};
+		let firstAsset = null;
+
+		try {
+			const r = await api.getDeviceMetrics();
+
+			r.data.data.forEach((deviceData) => {
+				//created Devices
+				const device = new DHDeviceFactory(deviceData);
+				assetMap[deviceData.asset_id] = device;
+
+				if (!deviceData.error && !firstAsset) firstAsset = deviceData.asset_id;
+
+				// Extract values once
+				const statuses = device.metrics
+				.filter(m => m.category === "Performance")
+				.map(m => m.value);
+
+				// Determine score based on precedence
+				let score = "good";
+				if (statuses.includes("poor")) {
+					score = "poor";
+				} else if (statuses.includes("average")) {
+					score = "average";
+				}
+
+				device.update({ "overall_score": score });
+			});
+
+			const asset_ids = Object.keys(assetMap);
+
+			state.selectedAsset = firstAsset || asset_ids[0] || null;
+			state.assetDetails = assetMap;
+			state.assetsLoading = false;
+		} catch (err) {
+			console.error(err);
+		}
+
+		return state.assetDetails;
+	};
+
+	/**
+   * Retrieve the DEX scores for a user
+   * @returns {Promise}
+   */
+	this.getDexScores = async function getDexScores() {
+		if (state.dex_score) return state.dex_score;
+
+		state.dex_score = await api.getDexScores();
+
+		return state.dex_score;
+	};
+
+	/**
+   * @param {array} scores - array of objects with dates
+   * @param {bool} desc - sort descending?
+   */
+	this.sortScoresByDate = function sortScoresByDate(scores, desc) {
+		return scores.sort((a, b) => {
+			// Parse the date strings into Date objects
+			let dateA = new Date(a.date);
+			let dateB = new Date(b.date);
+
+			// Compare the Date objects
+			return desc ? dateB - dateA : dateA - dateB;
+		});
+	};
+}
+]]></script>
+        <sys_class_name>sp_angular_provider</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 15:13:24</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>4eb0e36493d6c3906214fe327cba101d</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>DHManagerService</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_angular_provider_4eb0e36493d6c3906214fe327cba101d</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-08-03 14:47:16</sys_updated_on>
+        <type>service</type>
+    </sp_angular_provider>
+</record_update>

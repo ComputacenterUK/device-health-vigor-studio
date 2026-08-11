@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.dhAction</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Class representing a device action for Device Health</description>
+        <mobile_callable>false</mobile_callable>
+        <name>dhAction</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var dhAction = function dhAction(action_id) {
+	
+	this.action_id = action_id;
+	
+};
+
+dhAction.prototype = {
+	
+	// Table names
+	TN_CONFIG : 'x_mukl_dh_config',
+	TN_CACHE  : 'x_mukl_dh_metric_cache',
+	TN_ACTION : 'x_mukl_dh_actions',
+	
+	// Action types
+	AT_CLIENT   : 'client_script',
+	AT_SERVER   : 'server_script',
+	AT_REMOTE   : 'remote_action',
+	AT_PAGE     : 'page',
+	AT_URL      : 'url',
+	AT_ADVANCED : 'advanced',
+	
+	type: 'dhAction'
+};
+
+//------------------------------------------------
+// Static methods
+//------------------------------------------------
+
+dhAction.collectActionsForDevice = function collectActionsForDevice(cr) {
+	
+	var action_ids = [];
+	var NO_UID = cr.uid.nil();
+	
+	var ar = GlideRecord(this.TN_ACTION);
+	ar.addActiveQuery();
+	ar.query();
+	
+	while ( ar.next() ) {
+		
+		// Ignore Remote Actions if there's no UID
+		if ( ar.type == this.AT_REMOTE && NO_UID ) { continue; }
+		
+		// Add action if there's no condition, or a matching condition
+		if ( ar.condition.nil() || GlideFilter.checkRecord(cr, ar.condition) ) {
+			action_ids.push(ar.sys_id + '');
+		}
+		
+	}
+	
+	return action_ids.join(',');
+};
+
+//------------------------------------------------
+// Public property methods
+//------------------------------------------------
+
+dhAction.prototype.getId = function getId() {
+	return this.action_id;
+};
+
+dhAction.prototype.getRecord = function getRecord() {
+	
+	if ( this._record ) { return this._record; }
+	
+	var ar = new GlideRecord(this.TN_ACTION);
+	ar.get(this.getId());
+	
+	if ( !ar.isValidRecord() ) { return null; }
+	
+	this._record = ar;
+	
+	return this._record;
+};
+
+dhAction.prototype.getRemoteActionId = function getRemoteActionId() {
+	
+	var ar = this.getRecord();
+	if ( !ar || !ar.isValidRecord() ) { return ''; }
+	
+	return ar.action_id + '';
+};
+
+dhAction.prototype.isRemote = function isRemote() {
+	return this.getRecord().type == this.AT_REMOTE;
+};
+
+dhAction.prototype.isClient = function isClient() {
+	return this.getRecord().type == this.AT_CLIENT;
+};
+
+dhAction.prototype.isServer = function isServer() {
+	return this.getRecord().type == this.AT_SERVER;
+};
+
+//------------------------------------------------
+// Public action methods
+//------------------------------------------------
+
+dhAction.prototype.executeRemoteAction = function executeRemoteAction( device ) {
+	
+	if ( !device ) {
+		return this.handle_response(device, 404, 'Error', 'Device was not supplied');
+	}
+	
+	var nt = new dhNexthink();
+	var result = nt.executeRemoteAction( device, this );
+	var body_text;
+	
+	
+	// If action was unsucceeded, handle error
+	if ( result.status != 200 ) {
+		
+		body_text = result.resp_text || JSON.stringify(result.resp_body);
+		
+		var log = [ 'Error with Remote action: '];
+		log.push('Status: ' + result.status);
+		log.push('Response Body: \n' + body_text);
+		gs.error(log.join('\n'));
+		
+		return {
+			status : result.status,
+			data : body_text
+		};
+		
+	}
+	
+	// Action succeeded, so log the execution
+	var data = this.logExecution( device );
+	
+	return {
+		status : result.status,
+		data   : data
+	};
+};
+
+/**
+ * Runs the server script of this Action for a monitored device
+ * 
+ */
+dhAction.prototype.runServerScript = function runServerScript( device ) {
+	
+	var resp_message;
+	
+	if ( !device ) {
+		return this.handle_response(device, 404, 'Error', 'Device was not supplied');
+	}
+	
+	// Retrieve the GlideRecord object of the Device Health Action
+	var grAction = this.getRecord();
+
+	if ( !grAction ) {
+		resp_message = gs.getMessage('Unable to find active Action');
+		return this.handle_response( device, 404, 'ACTION_NOT_FOUND', resp_message);
+	}
+
+	// Retrieve the GlideRecord object of the Metric Cache
+	var grDevice = device.getCacheRecord();
+
+	if ( !grDevice ) {
+		resp_message = gs.getMessage('Unable to find device record');
+		return this.handle_response(device, 404, 'DEVICE_NOT_FOUND', resp_message);
+	}
+
+	var grAsset = device.getAssetRecord();
+
+	if ( !grAsset ) {
+		resp_message = gs.getMessage('Unable to find asset record');
+		return this.handle_response(device, 404, 'ASSET_NOT_FOUND', resp_message);
+	}
+	
+	// Run the server script of the Action
+	var gse = new GlideScopedEvaluator();
+	
+	gse.putVariable('action', grAction);
+	gse.putVariable('metric', grDevice);
+	gse.putVariable('asset',  grAsset);
+	
+	gse.putVariable('answer', true);
+	gse.putVariable('message', null);
+
+	gse.evaluateScript(grAction, 'server_script');
+
+	var answer  = gse.getVariable('answer');
+	var message = gse.getVariable('message');
+
+	if ( !answer ) {
+		resp_message = (message) ? gs.getMessage(message) : gs.getMessage('There was an issue executing the script');
+		return this.handle_response(device, 500, 'SCRIPT_FAILED', resp_message);
+	}
+	
+	resp_message = ( message ) ? gs.getMessage(message) : gs.getMessage('The script executed successfully');
+	
+	// Action succeeded, so log the execution
+	this.logExecution( device );
+	
+	return this.handle_response(device, 200, 'OK', resp_message);
+};
+
+dhAction.prototype.logExecution = function logExecution( device ) {
+	
+	if ( !device ) { return; }
+	
+	var cr = device.getCacheRecord();
+	if ( !cr ) { return; }
+	
+	var action_id = this.getId();
+	var log_time, run_today;
+	
+	// Log the execution to the portal log
+	var sl = new GlideRecord('sp_log');
+	sl.newRecord();
+	
+	sl.type  = 'Device Health Action clicked';
+	sl.table = this.TN_CACHE;
+	sl.id    = cr.sys_id;
+	sl.text  = action_id;
+	
+	sl.insert();
+	log_time = sl.sys_created_on + '';
+	
+	// Update the run_today field on the cache record
+	if ( this.isRemote() || this.isClient() || this.isServer() ) {
+		
+		// Get list of actions run today
+		run_today = cr.ra_run_today.nil() ? [] : (cr.ra_run_today + '').split();
+		
+		// Add action if not already present
+		if ( run_today.indexOf(action_id) < 0 ) {
+			run_today.push(action_id);
+		}
+		
+		// Update the cache
+		cr.ra_run_today = run_today.join(',');
+		cr.update();
+		
+	}
+	
+	return log_time;
+};
+
+//------------------------------------------------
+// Internal support methods
+//------------------------------------------------
+
+/**
+ * Handles the response of the execution of an Action server script
+ * 
+ * @param {dhDevice} device - The device to run the action against
+ * @param {integer} status - HTTP status code
+ * @param {string} code - unique message ID
+ * @param {string} message - short description of the script execution result
+ * @returns {object} payload with the script execution result: status code, message code, and message
+ */
+dhAction.prototype.handle_response = function handle_response(device, status, code, message) {
+	
+	var payload = {
+		status : status,
+		code   : code
+	};
+	
+	if ( status == 200 ) {
+		payload.message = message;
+	} else {
+		payload.error = {
+			message : message
+		};
+		gs.error( this + '\nAction Server script failed: ' + message );
+	}
+	
+	return payload;
+};
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:20</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>5d697c4c9392cf506214fe327cba10fd</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>dhAction</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_5d697c4c9392cf506214fe327cba10fd</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-20 13:44:20</sys_updated_on>
+    </sys_script_include>
+</record_update>

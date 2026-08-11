@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_ng_template">
+    <sp_ng_template action="INSERT_OR_UPDATE">
+        <id>dh-device-asset.html</id>
+        <sp_widget display_value="DH Device Picker">d6614bec93d2c3906214fe327cba107b</sp_widget>
+        <sys_class_name>sp_ng_template</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-24 09:23:15</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>dfb36c959352c7906214fe327cba104a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>dh-device-asset.html</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_ng_template_dfb36c959352c7906214fe327cba104a</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-24 09:23:15</sys_updated_on>
+        <template><![CDATA[<div class="device" tabIndex = "0"
+      ng-click="c.selectDevice(key)"
+      ng-class="{'active': c.state.selectedAsset == key}"
+      ng-keydown="c.handleKeyDown($event, key)">
+  <div class="icon" ng-class="{[asset.overall_score]: asset.metrics.length > 0}">
+    <!-- Show svg if device health -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+      <rect width="14" height="8" x="5" y="2" rx="2"></rect>
+      <rect width="20" height="8" x="2" y="14" rx="2"></rect>
+      <path d="M6 18h2"></path>
+      <path d="M12 18h6"></path>
+    </svg>
+  </div>
+  <div class="device-info">
+    <div id="device-model">{{asset.asset_model}}</div>
+    <div id="device-name">{{asset.name}}</div>
+  </div>
+</div>
+]]></template>
+    </sp_ng_template>
+</record_update>

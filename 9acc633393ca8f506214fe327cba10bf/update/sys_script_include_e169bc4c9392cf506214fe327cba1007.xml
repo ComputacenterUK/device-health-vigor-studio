@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.dhNexthink</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>The API interface script for Nexthink monitoring system</description>
+        <mobile_callable>false</mobile_callable>
+        <name>dhNexthink</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var dhNexthink = function dhNexthink() {
+	this.errors = [];
+};
+
+dhNexthink.prototype = {
+	
+	TN_CONFIG : 'x_mukl_dh_config',
+	
+	REST_MSG : 'DH Nexthink',
+	COMPANY  : gs.getProperty('x_mukl_dh.nexthink.company.id'),
+	REGION   : gs.getProperty('x_mukl_dh.nexthink.region'),
+	
+	QUERY_METHOD  : 'ExecuteQuery',
+	ACTION_METHOD : 'ExecuteRemoteAction',
+	
+	// USER_QUERY    : '#service_now_scorecard_dex_score_per_day',
+	// DEVICE_QUERY  : '#service_now_scorecard_device_metrics_v2',
+	// COUNTRY_QUERY : '#service_now_sustainability_consumption_by_country',
+	
+	type: 'dhNexthink'
+};
+
+dhNexthink.prototype.hasError = function hasError() {
+	return this.errors.length > 0;
+};
+
+dhNexthink.prototype.logError = function logError(txt) {
+	this.errors.push(txt);
+};
+
+dhNexthink.prototype.getErrorMessage = function getErrorMessage() {
+	return this.errors.join('\n');
+};
+
+dhNexthink.prototype.retrieveUserData = function retrieveUserData( user ) {
+	
+	if ( !user ) { return this.logError('User not supplied'); }
+	
+	var user_upn = user.getEmail();
+	
+	if ( !user_upn ) { return this.logError('User email not found'); }
+	
+	var entity = user.getEntity();
+	
+	var body = {
+		queryId    : entity.getSystemId(),
+		parameters : {
+			upn : user_upn
+		}
+	};
+	
+	this.result = this.execute_rest( this.QUERY_METHOD, body );
+	gs.info(this.result);
+	var days = this.normalise_user_data( user, this.result );
+	
+	// Compose an entry for today, if it was not retruned
+	var today = new GlideDate().getValue() + '';
+	if ( !days[0] || days[0].date != today ) {
+		// Add today's element to the start of the array
+		days.unshift({
+			date : today,
+			metrics : [],
+			info : 'No data returned for this user'
+		});
+	}
+	
+	// Map DEX score response to generic format
+	var user_data = {
+		user_id : user.getId(),
+		days    : days
+	};
+	
+	return user_data;
+};
+
+dhNexthink.prototype.normalise_user_data = function normalise_user_data( user, result ) {
+	
+	var headers = result.resp_body.headers;
+	var rows    = result.resp_body.data;
+	
+	var entity     = user.getEntity();
+	var map 	   = entity.getMetricMap();
+	var metric_map = entity.getSystemMap();
+	var head_map   = this.get_header_map(headers);
+	
+	var days = [];
+	
+	rows.forEach(function(row) {
+		
+		var day = { 
+			date    : row[0].split(' ')[0], 
+			metrics : []
+		};
+		
+		var system_id, metric;
+		
+		// Iterate over all active metrics
+		for ( system_id in metric_map ) {
+			
+			metric = {
+				metric_id : metric_map[system_id],
+				value_type: map.metrics[metric_map[system_id]].value_type,
+				value : null
+			};
+			
+			if ( system_id in head_map ) {
+				metric.value = row[head_map[system_id]];
+			}
+			
+			// Collect only non-null values
+			if ( metric.value !== null ) {
+				day.metrics.push(metric);
+			}
+			
+		}
+		
+		days.push(day);
+	}, map);
+	
+	return days;
+};
+
+dhNexthink.prototype.retrieveDeviceData = function retrieveDeviceData( user ) {
+	
+	if ( !user ) { return this.logError('User not supplied'); }
+	
+	var user_upn = user.getEmail();
+	
+	if ( !user_upn ) { return this.logError('User email not found'); }
+	
+	var device_names = user.getDeviceNames() || [];
+	var entity = dhEntity.getDeviceEntity();
+	
+	var body = {
+		queryId    : entity.getSystemId(),
+		parameters : {
+			upn : user_upn
+		}
+	};
+	
+	for ( var i = 0; i < 5; i++ ) {
+		body.parameters['device' + (i + 1)] = device_names[i] || '';
+	}
+	
+	this.result = this.execute_rest( this.QUERY_METHOD, body );
+	
+	// Convert to standard format
+	var device_data = {
+		user_id : user.getId(),
+		devices : this.normalise_device_data(user,this.result)
+	};
+	
+	return device_data;
+};
+
+dhNexthink.prototype.normalise_device_data = function normalise_device_data( user, result ) {
+	
+	var exec_dt = result.resp_body.executionDateTime;
+	var params  = result.req_body.parameters;
+	var headers = result.resp_body.headers;
+	var rows    = result.resp_body.data;
+	
+	var date = exec_dt.year + '-' + ('00' + exec_dt.month).slice(-2) + '-' + ('00' + exec_dt.day).slice(-2); 
+	
+	var entity     = dhEntity.getDeviceEntity();
+	var map 	   = entity.getMetricMap();
+	var metric_map = entity.getSystemMap();
+	var head_map   = this.get_header_map(headers);
+	
+	var devices = [];
+	var devices_found = {};
+	
+	// There is a row for each device returned
+	rows.forEach(function(r) {
+		
+		var device_name = r[0];
+		var metrics = [];
+		
+		var dev = {
+			device_name : device_name,
+			device_uid  : r[5],
+			asset_id    : user.getAssetId(device_name),
+			device_info : {
+				session   : r[1],
+				hw_model  : r[2],
+				hw_type   : r[3],
+				os_name   : r[4]
+			},
+			days : [{
+				date    : date,
+				metrics : metrics
+			}]
+		};
+		
+		var system_id, met;
+		
+		// Iterate over all active metrics
+		for ( system_id in metric_map ) {
+			
+			met = {
+				metric_id : metric_map[system_id],
+				value_type: map.metrics[metric_map[system_id]].value_type,
+				value : null
+			};
+			
+			if ( system_id in head_map ) {
+				met.value = r[head_map[system_id]];
+			}
+			
+			// Collect only non-null values
+			if ( met.value !== null ) {
+				metrics.push(met);
+			}
+			
+		}
+		
+		devices.push(dev);
+		devices_found[device_name] = true;
+		
+	}, map);
+	
+	// Check for missing devices
+	for ( var p in params ) {
+		
+		if ( !p.startsWith('device') ) { continue; }
+		
+		var device_name = params[p];
+		if ( !device_name ) { continue; }
+		
+		if ( !( device_name in devices_found ) ) {
+			devices.push({
+				device_name : device_name,
+				asset_id    : user.getAssetId(device_name),
+				days  : [{
+					date    : date,
+					metrics : [],
+					info    : 'Device not returned'
+				}],
+				
+			});
+		}
+	}
+	
+	return devices;
+};
+
+dhNexthink.prototype.retrieveEntityData = function retrieveEntityData(entity) {
+	
+	var body = {
+		queryId    : entity.getSystemId(),
+		parameters : {}
+	};
+	
+	this.result = this.execute_rest( this.QUERY_METHOD, body );
+	
+	// Convert to standard format
+	var data = {
+		items : this.normalise_item_data( entity, this.result )
+	};
+	
+	return data;
+};
+
+dhNexthink.prototype.normalise_item_data = function normalise_item_data( entity, result ) {
+	
+	var exec_dt = result.resp_body.executionDateTime;
+	var headers = result.resp_body.headers;
+	var rows    = result.resp_body.data;
+	
+	var date = exec_dt.year + '-' + ('00' + exec_dt.month).slice(-2) + '-' + ('00' + exec_dt.day).slice(-2); 
+	
+	var metric_map = entity.getSystemMap();
+	var map 	   = entity.getMetricMap();
+	var header_map = this.get_header_map(headers);
+	
+	var items = [];
+	
+	// There is a row for each device returned
+	rows.forEach(function(r) {
+		
+		var metrics = [];
+		
+		var item = {
+			item_name : r[0],
+			device_count : r[1],
+			days : [{
+				date    : date,
+				metrics : metrics
+			}]
+		};
+		
+		var system_id, header_id, met;
+		
+		// Iterate over all active metrics
+		for ( system_id in metric_map ) {
+			
+			header_id = system_id;
+			
+			met = {
+				metric_id : metric_map[system_id],
+				value_type: map.metrics[metric_map[system_id]].value_type,
+				value : null
+			};
+			
+			if ( header_id in header_map ) {
+				met.value = r[header_map[header_id]];
+			}
+			
+			// Collect only non-null values
+			if ( met.value !== null ) {
+				metrics.push(met);
+			}
+			
+		}
+		
+		items.push(item);
+		
+	},map);
+	
+	return items;
+};
+
+dhNexthink.prototype.get_header_map = function get_header_map(headers) {
+	
+	var len = headers.length;
+	var map = {};
+	for ( var i=0; i<len; i++ ) {
+		map[headers[i]] = i;
+	}
+	return map;
+};
+
+dhNexthink.prototype.executeRemoteAction = function executeRemoteAction( device, action ) {
+	
+	var body = {
+		remoteActionId: action.getRemoteActionId(),
+		params: {},
+		devices: [
+			device.getDeviceUid()
+		],
+	};
+	
+	this.result = this.execute_rest( this.ACTION_METHOD, body );
+	
+	// Convert to standard format
+	
+	return this.result;
+};
+
+dhNexthink.prototype.execute_rest = function execute_rest( rest_method, body ) {
+	
+	var req = new sn_ws.RESTMessageV2(this.REST_MSG, rest_method);
+	req.setStringParameterNoEscape('company', this.COMPANY);
+	req.setStringParameterNoEscape('region', this.REGION);
+	
+	req.setRequestBody(JSON.stringify(body));
+	var resp = req.execute();
+	
+	var result = {
+		req_body : body,
+		status   : resp.getStatusCode()
+	};
+	
+	var resp_text = resp.getBody();
+	
+	try {
+		result.resp_body = JSON.parse(resp_text);
+	} catch(err) {
+		result.resp_text = resp_text;
+		result.error = err + '';
+	}
+	
+	return result;
+};
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:20</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>e169bc4c9392cf506214fe327cba1007</sys_id>
+        <sys_mod_count>17</sys_mod_count>
+        <sys_name>dhNexthink</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_e169bc4c9392cf506214fe327cba1007</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-29 11:13:39</sys_updated_on>
+    </sys_script_include>
+</record_update>

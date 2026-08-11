@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="condition_table" label="Condition table" language="en" table="x_mukl_dh_actions">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>condition_table</element>
+            <help/>
+            <hint/>
+            <label>Condition table</label>
+            <language>en</language>
+            <name>x_mukl_dh_actions</name>
+            <plural>Condition tables</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>peter.watt</sys_created_by>
+            <sys_created_on>2026-07-20 10:33:48</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Condition table</sys_name>
+            <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+            <sys_update_name>sys_documentation_x_mukl_dh_actions_condition_table_en</sys_update_name>
+            <sys_updated_by>peter.watt</sys_updated_by>
+            <sys_updated_on>2026-07-20 10:33:48</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

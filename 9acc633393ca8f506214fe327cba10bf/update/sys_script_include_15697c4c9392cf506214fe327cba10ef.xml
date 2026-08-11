@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.dhEntity</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Class representing an entity for Device Health</description>
+        <mobile_callable>false</mobile_callable>
+        <name>dhEntity</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var dhEntity = function dhEntity(config_id) {
+
+    this.config_id = config_id;
+
+};
+
+dhEntity.prototype = {
+
+    TN_CONFIG: 'x_mukl_dh_config',
+
+    // Entity types
+    ET_USER: 'User',
+    ET_DEVICE: 'Device',
+    ET_AGGREGATE: 'Aggregate',
+
+    type: 'dhEntity'
+};
+
+dhEntity.getUserEntity = function getUserEntity() {
+
+    var PT = dhEntity.prototype;
+
+    var cr = new GlideRecord(PT.TN_CONFIG);
+    cr.addActiveQuery();
+    cr.addQuery('entity_type', PT.ET_USER);
+    cr.query();
+
+    if (!cr.next()) {
+        return null;
+    }
+
+    return new dhEntity(cr.sys_id + '');
+};
+
+dhEntity.getDeviceEntity = function getDeviceEntity() {
+
+    var PT = dhEntity.prototype;
+
+    var cr = new GlideRecord(PT.TN_CONFIG);
+    cr.addActiveQuery();
+    cr.addQuery('entity_type', PT.ET_DEVICE);
+    cr.query();
+
+    if (!cr.next()) {
+        return null;
+    }
+
+    return new dhEntity(cr.sys_id + '');
+};
+
+dhEntity.getAggregateEntity = function getAggregateEntity(param) {
+
+    var PT = dhEntity.prototype;
+
+    var cr = new GlideRecord(PT.TN_CONFIG);
+    cr.addActiveQuery();
+    cr.addQuery('entity_type', PT.ET_AGGREGATE);
+    if (param) {
+        cr.addQuery('name', param)
+            .addOrCondition('related_table', param);
+    }
+    cr.query();
+
+    if (!cr.next()) {
+        return null;
+    }
+
+    return new dhEntity(cr.sys_id + '');
+};
+
+//------------------------------------------------
+// Public property and access methods
+//------------------------------------------------
+
+dhEntity.prototype.getId = function getId() {
+    return this.config_id;
+};
+
+dhEntity.prototype.getName = function getName() {
+
+    var cr = this.getRecord();
+
+    if (!cr || !cr.isValidRecord()) {
+        return '';
+    }
+
+    return cr.name + '';
+};
+
+dhEntity.prototype.getSystemId = function getSystemId() {
+
+    var cr = this.getRecord();
+
+    if (!cr || !cr.isValidRecord()) {
+        return '';
+    }
+
+    return cr.system_id + '';
+};
+
+dhEntity.prototype.getMaxDays = function getMaxDays() {
+
+    var cr = this.getRecord();
+
+    if (!cr || !cr.isValidRecord()) {
+        return 1;
+    }
+
+    return cr.max_days.nil() ? 1 : parseInt(cr.max_days);
+};
+
+dhEntity.prototype.isMultiDay = function isMultiDay() {
+    return this.getMaxDays() > 1;
+};
+
+dhEntity.prototype.getRelatedTable = function getRelatedTable() {
+
+    var cr = this.getRecord();
+
+    if (!cr || !cr.isValidRecord()) {
+        return '';
+    }
+
+    return cr.related_table + '';
+};
+
+dhEntity.prototype.getRecord = function getRecord() {
+
+    if (this._record) {
+        return this._record;
+    }
+
+    var cr = new GlideRecord(this.TN_CONFIG);
+    cr.get(this.getId());
+
+    if (!cr.isValidRecord()) {
+        return null;
+    }
+
+    this._record = cr;
+
+    return this._record;
+};
+
+dhEntity.prototype.toString = function toString() {
+    return this.type + ' "' + this.getName() + '" [' + this.TN_CONFIG + ':' + this.getId() + ']';
+};
+
+//------------------------------------------------
+// Metric map and access methods
+//------------------------------------------------
+
+dhEntity.prototype.getMetricMap = function getMetricMap() {
+
+    if (this.metric_map) {
+        return this.metric_map;
+    }
+
+    this.metric_map = dhMetric.getEntityMetricMap(this);
+
+    return this.metric_map;
+};
+
+dhEntity.prototype.getMetric = function getMetric(metric_id) {
+    var item = this.getMetricMap().metrics[metric_id] || null;
+    return item ? new dhMetric(item) : null;
+};
+
+dhEntity.prototype.getMetricName = function getMetricName(metric_id) {
+    return this.getMetricMap().id2name[metric_id] || '';
+};
+
+dhEntity.prototype.getInstanceMap = function getInstanceMap() {
+    return this.getMetricMap().name2id;
+};
+
+dhEntity.prototype.getSystemMap = function getSystemMap() {
+    return this.getMetricMap().system2id;
+};
+
+//------------------------------------------------
+// Public action methods
+//------------------------------------------------
+
+dhEntity.prototype.refreshInstances = function refreshInstances() {
+
+    var nt = new dhNexthink();
+    var new_data = nt.retrieveEntityData(this);
+
+    var items = new_data.items;
+    var cache = new dhCache();
+
+    items.forEach(function(item) {
+
+        var cr = new GlideRecord(this.getRelatedTable());
+        cr.get('name', item.item_name || '' );
+
+		if (!cr.isValidRecord()) {
+            return;
+        }
+
+        var related_id = cr.sys_id + '';
+
+        var agg = new dhInstance(related_id, this);
+
+        cache.save_instance_data(agg, item);
+
+    }, this);
+
+};
+
+
+//------------------------------------------------
+// Internal support methods
+//------------------------------------------------]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:20</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>15697c4c9392cf506214fe327cba10ef</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>dhEntity</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_15697c4c9392cf506214fe327cba10ef</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-28 15:45:31</sys_updated_on>
+    </sys_script_include>
+</record_update>

@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_mukl_dh.DHMetricCache</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>DHMetricCache</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[/**
+ * @typedef {import('../../../autocomplete/server').sn_ws.RESTResponseV2} RESTResponseV2
+ * @typedef {import('../../../autocomplete/server').sn_ws.RESTMessageV2} RESTMessageV2
+ */
+
+class DHMetricCache {
+	static user = {
+		username: gs.getUserName(),
+		userID: gs.getUserID()
+	};
+
+	static metricGQ = new global.GlideQuery("x_mukl_dh_metric_cache");
+
+	/**
+	 * Method to check if there is valid cache to return
+	 * @param {String} type
+	 * @param {Array} data
+	 * @returns {Array}
+	 */
+	static checkMetricCache(type, data, user) {
+		switch (type) {
+			case "Metric":
+				if (user && user != "") return null;
+				let result = [];
+				for (let i = 0; i < data.length; i++) {
+					let lookup = this.lookupCache("Metric", data[i]);
+
+					if (lookup === null) return null;
+
+					lookup.actions = this.compileActions(lookup);
+					result.push(lookup);
+				}
+				return result;
+			case "DEX":
+				return this.checkDEXCache();
+		}
+	}
+
+	/**
+	 * Utility method to lookup a record from cache, based on type
+	 * @param {String} type
+	 * @param {String} id
+	 * @returns {Object}
+	 */
+	static lookupCache(type, id) {
+		const idMap = {
+			Metric: {
+				field: "asset.ci.name",
+				fields: DHAPIConfig.cache_fields,
+			},
+			DEX: { field: "user", fields: Object.values(DHAPIConfig.dex_map) },
+		};
+
+		const lookupMap = idMap[type];
+
+		return this.metricGQ
+			.where(lookupMap.field, id)
+			.where("date", new GlideDate().getDisplayValueInternal())
+			.selectOne(lookupMap.fields)
+			.orElse(null);
+	}
+
+	/**
+	 * Handle caching for DH API responses.
+	 *
+	 * @param {RESTResponseV2} response - Response object from sn_ws REST API.
+	 * @param {RESTMessageV2} request - Original RESTMessageV2 request object.
+	 * @param {Object} additional - Additional options.
+	 * @param {string} additional.action - action sys_id
+	 * @param {string} additional.sys_id - metric cache sys_id
+	 * @returns {any} Processed result depending on payload (array/object/raw body).
+	 */
+	static cacheMetrics(response, request, additional) {
+
+		gs.info(response.getBody())
+
+		let payload = JSON.parse(response.getBody());
+
+		const switchCase = payload?.queryId || "action";
+
+		switch (switchCase) {
+			case DHAPIConfig.NXT_DEVICEMETRICQRYID:
+				return this.cacheDeviceMetrics(payload, request);
+			case DHAPIConfig.NXT_DEXSCORESQRYID:
+				return this.cacheDexScore(payload);
+			case "action":
+				return this.cacheActionExecution(additional);
+			default:
+				return response.getBody();
+		}
+	}
+
+	/**
+	 * TODO: What happens if the query only contains a user... do we manually get their assigned devices, and include them in the query..
+	 * @param {Object} payload
+	 * @param {sn_ws.RESTMessageV2}
+	 */
+	static cacheDeviceMetrics(payload, request) {
+		if (!payload?.data) return;
+
+		let cache = [];
+
+		let notFoundAssets = payload.data.map((arr) => arr[0]);
+		let queried_devices = [];
+
+		var params = JSON.parse(request.getRequestBody())?.parameters;
+		for (let k in params) {
+			if (k.indexOf("device") > -1 && params[k])
+				queried_devices.push(params[k]);
+		}
+
+		const asset_list = [
+			...new Set([].concat(...[notFoundAssets, queried_devices])),
+		];
+
+		new global.GlideQuery("alm_asset")
+			.whereNotNull("ci")
+			.where("ci.name", "IN", asset_list)
+			.where('assigned_to', this.user.userID)
+			.select(["ci.name"])
+			.forEach((a) => {
+				const deviceName = a.ci.name.toLowerCase();
+
+				cache.push(
+					this.insertOrUpdateMetricByAsset(a.sys_id, {
+						data: payload.data.find((e) => e[0]?.toLowerCase() == deviceName) || [],
+						headers: payload.headers,
+						map: DHAPIConfig.DEVICEMETRICMAP,
+					})
+				);
+
+				notFoundAssets = notFoundAssets.filter((a) => a != deviceName);
+				queried_devices = queried_devices.filter((a) => a != deviceName);
+			});
+
+		if (notFoundAssets.length)
+			gs.warn(
+				`Unable to find and cache DH data for these assets: ${notFoundAssets}`
+			);
+
+		if (queried_devices.length) {
+			gs.warn(
+				`Nexthink did n0t provide data for queried devices: ${queried_devices}`
+			);
+		}
+
+		return cache;
+	}
+
+	/**
+	 * Insert or update a metric cache record using the asset sys_id
+	 * @param {String} sys_id
+	 * @param {Object} data
+	 * @param {Array} data.data
+	 * @param {Array<string>} data.header
+	 * @param {Object} data.map
+	 * @returns {Array<Object>}
+	 */
+	static insertOrUpdateMetricByAsset(sys_id, data) {
+		const fields = DHAPIConfig.cache_fields;
+
+		const existingRecord = this.metricGQ
+			.where("asset", sys_id)
+			.where("type", "Metric")
+			.selectOne()
+			.orElse(null);
+
+		let update = {
+			type: "Metric",
+			asset: sys_id,
+			date: new GlideDate().getDisplayValueInternal(),
+			...existingRecord,
+			...this.constructMetrics(data),
+		};
+
+		let cache;
+		const payload_sys_id = update.sys_id;
+
+		if (!payload_sys_id) {
+			cache = this.metricGQ.insert(update).orElse(null);
+		} else {
+
+			delete update.sys_id;
+
+			cache = this.metricGQ
+				.where("sys_id", payload_sys_id)
+				.update(update)
+				.orElse(null);
+		}
+
+		/** GLIDEQUERY BUG. Insert/Update does not return dot walked fields, so we have to
+		 * re-query to get the correct json object
+		 */
+		let record = this.metricGQ.get(cache.sys_id, fields).orElse(null);
+
+		record.actions = this.compileActions(record);
+
+		return record;
+	}
+
+	/**
+	 * Insert or update a dex cache record using records sys_id
+	 * @param {String} sys_id
+	 * @param {Object} data
+	 * @param {Array} data.data
+	 * @param {Array<string>} data.header
+	 * @param {Object} data.map
+	 * @returns {Array<Object>}
+	 */
+	static insertOrUpdateDEXScoreBySysId(sys_id, data) {
+		let update = {
+			type: "DEX",
+			sys_id: sys_id,
+			user: DHMetricCache.user.userID,
+			...this.constructMetrics(data),
+		};
+
+		if (!sys_id) delete update.sys_id;
+
+		const fields = Object.values(data.map);
+
+		//we need to convert date strings because you know date and time handling is junk..
+		const nowDate = new GlideDate();
+		nowDate.setValue(update.date);
+
+		update.date = nowDate;
+
+		/** DO NOT USE insertOrUpdate ServiceNow have broken it */
+		//return this.metricGQ.insertOrUpdate(update, fields).orElse(null);
+
+		/** Manually chose between insert or update due to broken method on GlideQuery */
+		if(!update.sys_id) return this.metricGQ.insert(update,fields).orElse(null);
+
+		const update_sys_id = update.sys_id;
+		delete update.sys_id;
+
+		return this.metricGQ.where("sys_id", update_sys_id).update(update,fields).orElse(null);
+	}
+
+	/**
+	 * This method will construct a json object for metric cache record
+	 * @param {Object} payload
+	 * @param {Array} payload.data
+	 * @param {Array<string>} payload.header
+	 * @param {Object} payload.map
+	 * @returns {Object}
+	 */
+	static constructMetrics({ data, headers, map }) {
+		let obj = {};
+
+		for (let i = 0; i < headers.length; i++) {
+			let mapped_field = map[headers[i]];
+
+			if (mapped_field) obj[mapped_field] = data[i] ?? null;
+		}
+		return obj;
+	}
+
+	/**
+	 * Caching method for caching Dex records
+	 * @param {Object} payload
+	 * @returns {Array<Object>}
+	 */
+	static cacheDexScore(payload) {
+		if (!payload?.data) return;
+
+		let cache = [];
+
+		let gdtFrom = new GlideDate();
+		gdtFrom.addDaysLocalTime(-1 * DHAPI.DEXSCOREDAYS);
+
+		let existing = {};
+		const append = " 00:00:00";
+
+		//find existing records, and insert or update each row
+		this.metricGQ
+			.where("user", DHMetricCache.user.userID)
+			.where("date", ">=", gdtFrom)
+			.orderByDesc("date")
+			.select(["date"])
+			.forEach((metric) => {
+				existing[metric.date + append] = metric.sys_id;
+			});
+
+		//okay we have our list of existing, lets go through each data row, and insertorUpdate
+		for (let i = 0; i <= DHAPI.DEXSCOREDAYS; i++) {
+			const date = gdtFrom.getDisplayValueInternal() + append;
+			const row = payload.data.find((r) => r[0] == date) || [date, null];
+			const sys_id = existing[date] || null;
+
+			var record = this.insertOrUpdateDEXScoreBySysId(sys_id, {
+				data: row,
+				headers: payload.headers,
+				map: DHAPIConfig.dex_map,
+			});
+
+			delete record.type;
+			delete record.user;
+
+			cache.push(record);
+
+			gdtFrom.addDaysLocalTime(1);
+		}
+		
+		return cache.reverse();
+	}
+
+	/**
+	 * Method to check if the DEX cache for logged in user is valid
+	 * @returns {Array<Object>}
+	 */
+	static checkDEXCache() {
+		var lookup = this.lookupCache("DEX", DHMetricCache.user.userID);
+
+		if (!lookup) return;
+
+		return this.metricGQ
+			.where("user", DHMetricCache.user.userID)
+			.orderByDesc("date")
+			.limit(DHAPI.DEXSCOREDAYS + 1)
+			.select(Object.values(DHAPIConfig.dex_map))
+			.toArray(DHAPI.DEXSCOREDAYS + 1);
+	}
+
+	/**
+	 * @param {Object} data
+	 * @param {string} data.sys_id Sys_id of the Metric Record
+	 * @param {string} data.action Sys_id of the Action Record
+	 */
+	static cacheActionExecution(data) {
+		const action = DeviceHealth.getAction(data.action, ["type"]);
+
+		if (!action) return null;
+
+		if (action.type == "remote_action" || action.type == "client_script" || action.type == "server_script") {
+			let metricCache = this.metricGQ
+				.get(data.sys_id, ["ra_run_today"])
+				.orElse(null);
+
+			if (!metricCache) return null;
+
+			//add our action to run_today
+			let rt = metricCache.ra_run_today || [];
+
+			if (typeof rt === "string") rt = rt.split(",");
+
+			rt.push(data.action);
+
+			metricCache.ra_run_today = [...new Set(rt)].join(",");
+
+			var sysid = metricCache.sys_id;
+			delete metricCache.sys_id;
+
+			this.metricGQ.where('sys_id', sysid).update(metricCache)
+
+			//this.metricGQ.insertOrUpdate(metricCache);
+		}
+
+		return new global.GlideQuery("sp_log")
+			.insert(
+				{
+					type: "DH Action Clicked",
+					table: "x_mukl_dh_metric_cache",
+					id: data.sys_id,
+					text: data.action,
+				},
+				["sys_created_on"]
+			)
+			.get();
+	}
+
+	static compileActions(record) {
+		let actions_list = [];
+
+		if (!record.actions) return actions_list;
+
+		// Get all actions an an associated
+		new global.GlideQuery("x_mukl_dh_actions")
+			.where("active", true)
+			.where("sys_id", "IN", record.actions.split(","))
+			.select([
+				"title",
+				"action_text",
+				"short_description",
+				"type",
+				"page_link$DISPLAY",
+				"parameters",
+				"url",
+				"script",
+			])
+			.forEach((act) => {
+				//if remote action check if it's been run
+				if (
+					(act.type == "remote_action" || act.type == "advanced") &&
+					record.ra_run_today &&
+					record.ra_run_today.indexOf(act.sys_id) > -1
+				) {
+					act.run_today = true;
+				}
+
+				actions_list.push(act);
+			});
+
+		return actions_list;
+	}
+}
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-20 13:44:20</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>11697c4c9392cf506214fe327cba10f5</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>DHMetricCache</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sys_script_include_11697c4c9392cf506214fe327cba10f5</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-21 12:58:20</sys_updated_on>
+    </sys_script_include>
+</record_update>

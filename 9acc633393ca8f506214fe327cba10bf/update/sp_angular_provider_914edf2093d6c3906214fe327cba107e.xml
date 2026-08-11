@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_angular_provider">
+    <sp_angular_provider action="INSERT_OR_UPDATE">
+        <name>DHApiFactory</name>
+        <script><![CDATA[function DHApiFactory($http) {
+  class DHApiInstance {
+    constructor(version = "") {
+      this.version = version;
+    }
+
+    #buildUrl(endpoint) {
+      const vPart = this.version ? '/' + this.version : "";
+      return '/api/x_mukl_dh' + vPart + '/dh/' + endpoint;
+    }
+
+    #handleActionError(e) {
+      var errorMessage =
+        "An unexpected error occurred while executing the action";
+      if (e.data && e.data.error && e.data.error.message) {
+        errorMessage = e.data.error.message;
+        if (e.data.error.detail) {
+          errorMessage += " - " + e.data.error.detail;
+        }
+      }
+      throw new Error(errorMessage);
+    }
+
+    getDexScores() {
+      return $http({
+        method: "GET",
+        url: this.#buildUrl("dex-score"),
+        cache: true,
+      }).then((r) => r.data);
+    }
+
+    getDeviceMetrics() {
+      let url = new URL(
+        this.#buildUrl("device-metrics"),
+        window.location.origin
+      );
+
+      return $http({
+        method: "GET",
+        url: url.toString(),
+        cache: true,
+      });
+    }
+
+    executeRemoteAction(action_id, asset_id) {
+      return $http({
+        method: "POST",
+        url: this.#buildUrl("exec-action") + '/' + action_id + '/' + asset_id,
+      })
+        .then((r) => r.data)
+        .catch((e) => this.#handleActionError(e));
+    }
+
+    executeActionServerScript(action_id, asset_id) {
+      return $http({
+        method: "POST",
+        url: this.#buildUrl("exec-action-server-script") + '/' + action_id + '/' + asset_id,
+      })
+        .then((r) => r.data)
+        .catch((e) => this.#handleActionError(e));
+    }
+  }
+
+  return (version) => new DHApiInstance(version);
+}
+]]></script>
+        <sys_class_name>sp_angular_provider</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 15:05:40</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>914edf2093d6c3906214fe327cba107e</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>DHApiFactory</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_angular_provider_914edf2093d6c3906214fe327cba107e</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-23 10:42:29</sys_updated_on>
+        <type>factory</type>
+    </sp_angular_provider>
+</record_update>

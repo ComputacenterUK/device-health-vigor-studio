@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function(DHManagerService, $scope) {
+
+    var c = this;
+
+    $scope.$watch(() => DHManagerService.state.assetsLoading, (loading) => c.loading = loading);
+
+    c.$onInit = function() {
+        c.selectedAsset = DHManagerService.state.selectedAsset;
+
+        if (c.selectedAsset) {
+            c.metrics = DHManagerService.getSelectedAssetInfo()?.metrics?.filter((metric) => metric.category === 'Performance');
+            console.log(c.metrics);
+        }
+
+        // Watch for changes in DHManagerService.selectedAsset
+        $scope.$watch(() => DHManagerService.state.selectedAsset, function(newVal, oldVal) {
+
+            if (newVal !== oldVal) {
+                c.selectedAsset = newVal;
+
+                if (c.selectedAsset) {
+                    c.metrics = DHManagerService.getSelectedAssetInfo()?.metrics?.filter((metric) => metric.category === 'Performance');
+                } else {
+                    c.metrics = null;
+                }
+            }
+        });
+    }
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.error-display {
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    font-size: large;
+    font-weight: bold;
+    gap: 20px;
+
+    img {
+        max-width: 450px;
+        max-height: 150px;
+    }
+}
+
+.loading {
+    min-height: 15rem;
+    width: 100%;
+    border-radius: 1rem;
+    background: #f6f7f8;
+    background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background-repeat: no-repeat;
+    background-size: 100rem 28rem;
+    animation: shimmer 2s infinite linear;
+  }
+
+.metric {
+    display: flex;
+    justify-content: space-between;
+    align-items:center;
+    padding: 0 1rem;
+    border-radius: 1rem;
+
+    &amp;:hover {
+        background-color: rgba(128, 128, 128, .1);
+    }
+
+    .title {
+        font-size: large;
+        font-weight: bold;
+    }
+
+    .tooltip {
+        text-transform: capitalize;
+    }
+
+    .rating {
+        text-transform: capitalize;
+        padding: 8px;
+        border-radius: 10px;
+
+        &amp;.margin-sm {
+            margin: .5rem 0;
+        }
+
+        svg {
+            margin-top: .5rem;
+            scale: 150%
+        }
+
+        &amp;.poor {
+            background-color: #FEE2E2;
+            color: #DC2626;
+        }
+        
+        &amp;.average {
+            background-color: #FEF3C7;
+            color: #D97706;
+        }
+        
+        &amp;.good {
+            background-color: #DCFCE7;
+            color: #16A34A;
+        }
+    }
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>dh_device_metrics</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>DH Device Metrics</name>
+        <option_schema>[{"name":"rating_type","section":"Presentation","default_value":"Icon","label":"Rating type","type":"choice","choices":[{"label":"Icon","value":"Icon"},{"label":"Text","value":"Text"}]}]</option_schema>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 12:55:02</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>624147ec93d2c3906214fe327cba10c8</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>DH Device Metrics</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_widget_624147ec93d2c3906214fe327cba10c8</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-28 09:53:37</sys_updated_on>
+        <template><![CDATA[<div class="panel panel-body">
+  <div id="dh-container">
+    <div class="header-text">
+      <div class="title">
+        <h2>${dh.portal.deviceMetrics.title}</h2>
+      </div>
+      <p>${dh.portal.deviceMetrics.subheader}</p>
+    </div>
+    <div ng-class="{'loading': c.loading === true}">
+      <div class="device-metrics" ng-if="c.selectedAsset && c.metrics.length > 0" >
+        <ng-include ng-repeat="metric in c.metrics" src="'dh-device-metric.html'"></ng-include>
+      </div>
+      
+      <!-- No metrics found -->
+      <div class="error-display" ng-if="c.selectedAsset && (!c.metrics || c.metrics.length == 0) && c.loading === false">
+        <img src="x_mukl_dh.grid_item_no_score.png" />
+        <span ng-if="!c.hasDevices && !c.loading">${dh.portal.no_metrics}</span>
+      </div>
+      
+      <!-- No device selected -->
+      <div class="error-display" ng-if="!c.selectedAsset && c.loading === false">
+        <img src="x_mukl_dh.grid_item_no_score.png" />
+        <span ng-if="!c.hasDevices">${dh.portal.select_device}</span>
+      </div>
+    </div>
+  </div>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

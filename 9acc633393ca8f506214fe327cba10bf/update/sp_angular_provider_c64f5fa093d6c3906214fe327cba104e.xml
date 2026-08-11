@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_angular_provider">
+    <sp_angular_provider action="INSERT_OR_UPDATE">
+        <name>DHActionFactory</name>
+        <script><![CDATA[function DHActionFactory(
+  $location,
+  $window,
+  spModal,
+  i18n,
+  spUtil,
+  DHApiFactory,
+  snAnalytics,
+) {
+  
+  const api = DHApiFactory();
+
+  const setupAnalyticsPayload = function (action, device) {
+    let event = {
+      name: "ADH Action Executed",
+      data: {},
+    };
+
+    event.data["Action Type"] = action.type;
+    event.data["Action Category"] = action.category;
+    event.data["Action Title"] = action.title;
+    event.data["Device Name"] = device.name;
+    event.data["Device Model"] = device.asset_model;
+
+    return event;
+  };
+
+  const handlers = {
+    /**
+     * Handle the execution of a page action
+     * @param {Object} action
+     */
+    page: function (action) {
+      let path = $location.path();
+      let pageURL = path + "?id=" + action.page_link$DISPLAY;
+      if (action.parameters && Object.keys(action.parameters).length > 0) {
+        for (let key in action.parameters) {
+          pageURL += "&" + key + "=" + action.parameters[key];
+        }
+      }
+      $window.open(pageURL);
+    },
+
+    /**
+     * Handle the execution of a URL action
+     * @param {Object} action
+     */
+    url: function (action) {
+      $window.open(action.url);
+    },
+
+    /**
+     * Handle the execution of a remote action
+     * @param {Object} action
+     */
+    remote_action: async function (action, device) {
+      action.running = true;
+
+      try {
+        await api.executeRemoteAction(action.sys_id, device.asset_id);
+        action.run_today = true;
+        spModal.open({
+          title: i18n.getMessage("dh.action.remote.one_time.title"),
+          message: i18n.getMessage("dh.action.remote.one_time"),
+          buttons: [
+            {
+              label: i18n.getMessage("OK"),
+              primary: true,
+            },
+          ],
+        });
+      } catch (e) {
+        spUtil.addErrorMessage(
+          "An error occurred while executing the action. Please contact the system administrator.<br><br>Error: " +
+            e.message,
+        );
+      }
+
+      action.running = false;
+    },
+
+    /**
+     * Handle the execution of a client script action
+     * @param {Object} action
+     */
+    client_script: function (action) {
+      eval(action.script);
+      action.run_today = true;
+    },
+
+    /**
+     * Handle the execution of a server script action
+     * @param {Object} action
+     */
+    server_script: async function (action, device) {
+      action.running = true;
+
+      try {
+        var serverScriptResponse = await api.executeActionServerScript(
+          action.sys_id,
+          device.asset_id,
+        );
+        action.running = false;
+        action.run_today = true;
+
+        spUtil.addInfoMessage(serverScriptResponse.message);
+      } catch (e) {
+        spUtil.addErrorMessage(
+          "An error occurred while executing the action. Please contact the system administrator.<br><br>Error: " +
+            e.message,
+        );
+      }
+
+      action.running = false;
+    },
+  };
+
+  return {
+    /**
+     * Handle for executing an action based on its type
+     * @param {Object} action
+     * @param {Device} device
+     */
+    executeAction: async function (action, device) {
+
+      switch (action.type) {
+        case "page":
+          handlers.page(action);
+          break;
+        case "url":
+          handlers.url(action);
+          break;
+        case "remote_action":
+          handlers.remote_action(action, device);
+          break;
+        case "client_script":
+          handlers.client_script(action);
+          break;
+        case "server_script":
+          handlers.server_script(action, device);
+          break;
+        default:
+          console.error("Couldn't match the type for the action", action);
+      }
+
+      try {
+        const payload = setupAnalyticsPayload(action, device);
+        snAnalytics.addEvent(payload);
+      } catch (e) {
+        console.error("Error generating/sending analytics payload for action execution",e);
+      }
+    },
+  };
+}
+]]></script>
+        <sys_class_name>sp_angular_provider</sys_class_name>
+        <sys_created_by>peter.watt</sys_created_by>
+        <sys_created_on>2026-07-22 15:07:38</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>c64f5fa093d6c3906214fe327cba104e</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>DHActionFactory</sys_name>
+        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_update_name>sp_angular_provider_c64f5fa093d6c3906214fe327cba104e</sys_update_name>
+        <sys_updated_by>peter.watt</sys_updated_by>
+        <sys_updated_on>2026-07-28 13:11:14</sys_updated_on>
+        <type>factory</type>
+    </sp_angular_provider>
+</record_update>
