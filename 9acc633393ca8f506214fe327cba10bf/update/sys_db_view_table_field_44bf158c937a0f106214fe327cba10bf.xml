@@ -8,10 +8,10 @@
         <sys_id>44bf158c937a0f106214fe327cba10bf</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>str_value</sys_name>
-        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy/>
         <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
-        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sys_db_view_table_field_44bf158c937a0f106214fe327cba10bf</sys_update_name>
         <sys_updated_by>huw.nolan</sys_updated_by>
         <sys_updated_on>2026-08-14 13:03:06</sys_updated_on>

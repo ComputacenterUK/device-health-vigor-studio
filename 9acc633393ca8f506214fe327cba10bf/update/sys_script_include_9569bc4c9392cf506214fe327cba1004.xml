@@ -499,10 +499,10 @@ DeviceHealth.prototype.AIUserData = function AIUserData() {
         <sys_id>9569bc4c9392cf506214fe327cba1004</sys_id>
         <sys_mod_count>12</sys_mod_count>
         <sys_name>DeviceHealth</sys_name>
-        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy>read</sys_policy>
         <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
-        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sys_script_include_9569bc4c9392cf506214fe327cba1004</sys_update_name>
         <sys_updated_by>huw.nolan</sys_updated_by>
         <sys_updated_on>2026-08-14 08:38:43</sys_updated_on>

@@ -13,10 +13,10 @@
         <sys_id>df3acd089316cf506214fe327cba10a9</sys_id>
         <sys_mod_count>0</sys_mod_count>
         <sys_name>no_action</sys_name>
-        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy/>
         <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
-        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sys_ui_message_df3acd089316cf506214fe327cba10a9</sys_update_name>
         <sys_updated_by>peter.watt</sys_updated_by>
         <sys_updated_on>2026-07-20 14:57:55</sys_updated_on>

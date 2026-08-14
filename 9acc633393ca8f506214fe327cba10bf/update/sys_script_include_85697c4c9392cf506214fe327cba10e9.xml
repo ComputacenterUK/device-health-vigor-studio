@@ -253,10 +253,10 @@
         <sys_id>85697c4c9392cf506214fe327cba10e9</sys_id>
         <sys_mod_count>5</sys_mod_count>
         <sys_name>DHAPI</sys_name>
-        <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
+        <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy>read</sys_policy>
         <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
-        <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
+        <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sys_script_include_85697c4c9392cf506214fe327cba10e9</sys_update_name>
         <sys_updated_by>peter.watt</sys_updated_by>
         <sys_updated_on>2026-08-11 15:45:44</sys_updated_on>
