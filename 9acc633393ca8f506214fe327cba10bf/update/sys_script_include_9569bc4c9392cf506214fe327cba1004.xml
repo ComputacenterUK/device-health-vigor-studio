@@ -14,7 +14,7 @@
     this.user_id = user_id;
 
     this.labels = this.getMetricLabelMaps();
-    this.getDH();
+    
 };
 
 DeviceHealth.TN_CONFIG = 'x_mukl_dh_config';
@@ -29,20 +29,15 @@ DeviceHealth.TN_CONFIG = 'x_mukl_dh_config';
  * @param {sn_ws_int.RESTAPIRequest} -request,
  * @param {sn_ws_int.RESTAPIResponse} - response
  */
-DeviceHealth.provideDexScores = function provideDexScores(request, response, version) {
+DeviceHealth.provideDexScores = function provideDexScores(request, response) {
 
-    var user, api, resp = {
+    var user, resp = {
         status: 200,
         data: {}
     };
 
-    //if ( version == 'v2' ) {
     user = new dhUser();
     resp.data = user.getMetricItems();
-    /*} else {
-    	api = new DHAPI();
-    	resp = api.dex_scores;
-    }*/
 
     response.setStatus(resp.status);
     response.setContentType('application/json');
@@ -57,27 +52,16 @@ DeviceHealth.provideDexScores = function provideDexScores(request, response, ver
  * @param {sn_ws_int.RESTAPIRequest} -request,
  * @param {sn_ws_int.RESTAPIResponse} - response
  */
-DeviceHealth.provideDeviceMetrics = function provideDeviceMetrics(request, response, version) {
+DeviceHealth.provideDeviceMetrics = function provideDeviceMetrics(request, response) {
 
-    var user, api, params, devices;
+    var user;
     var resp = {
         status: 200,
         data: {}
     };
 
-    //if ( version == 'v2' ) {
     user = new dhUser();
     resp.data = user.getDeviceMetrics();
-    /*} else {
-
-    	api = new DHAPI();
-    	params = request.queryParams;
-    
-    	user = params?.user ? params.user[0] : null;
-    	devices = params?.devices ? params.devices[0].split(',') : [];
-    
-    	resp = api.getDeviceMetrics(user, devices);
-    }*/
 
     response.setStatus(resp.status);
     response.setContentType('application/json');
@@ -116,12 +100,10 @@ DeviceHealth.provideCountryMetrics = function provideCountryMetrics(request, res
  * @param {sn_ws_int.RESTAPIRequest} -request,
  * @param {sn_ws_int.RESTAPIResponse} - response
  */
-DeviceHealth.executeRemoteAction = function executeRemoteAction(request, response, version) {
+DeviceHealth.executeRemoteAction = function executeRemoteAction(request, response) {
 
-    var action_id, asset_id, cache_id;
-    var user, action, device, api, resp;
-
-    //if ( version == 'v2' ) {
+    var action_id, asset_id;
+    var user, action, device, resp;
 
     action_id = request.pathParams?.action_id;
     asset_id = request.pathParams?.asset_id;
@@ -137,21 +119,6 @@ DeviceHealth.executeRemoteAction = function executeRemoteAction(request, respons
     device = user.getDevice(asset_id);
 
     resp = action.executeRemoteAction(device);
-
-    /*} else {
-    	
-    	action_id = request.pathParams?.id;
-    	cache_id  = request.pathParams?.metric;
-    	
-    	if ( !action_id || !cache_id ) {
-    		return response.setError(
-    			new sn_ws_err.BadRequestError('Missing action or metric path paramaters')
-    		);
-    	}
-    
-    	api = new DHAPI();
-    	resp = api.executeRemoteAction(action_id, cache_id);
-    }*/
 
     if (resp.status != 200) {
         return response.setError(this.genericErrorObject(resp));
@@ -172,13 +139,11 @@ DeviceHealth.executeRemoteAction = function executeRemoteAction(request, respons
  * @param {sn_ws_int.RESTAPIRequest} - request,
  * @param {sn_ws_int.RESTAPIResponse} - response
  */
-DeviceHealth.executeActionServerScript = function executeActionServerScript(request, response, version) {
+DeviceHealth.executeActionServerScript = function executeActionServerScript(request, response) {
 
     var action_id, asset_id, cache_id;
     var user, action, device, resp;
     var errorMessage;
-
-    //if ( version == 'v2' ) {
 
     action_id = request.pathParams?.action_id;
     asset_id = request.pathParams?.asset_id;
@@ -194,24 +159,6 @@ DeviceHealth.executeActionServerScript = function executeActionServerScript(requ
     device = user.getDevice(asset_id);
 
     resp = action.runServerScript(device);
-
-    /*} else {
-    
-    	action_id = request.pathParams?.action;
-    	cache_id  = request.pathParams?.metric;
-    
-    	if ( !action_id || !cache_id ) {
-    		
-    		errorMessage = gs.getMessage('Missing action or metric path paramaters');
-    		gs.error('DeviceHealth.executeActionServerScript failed: ' + errorMessage + '\nAction sys_id: ' + action_id + '\nMetric Cache sys_id: ' + cache_id);
-    	
-    		response.setError(new sn_ws_err.BadRequestError(errorMessage));
-    	
-    		return;
-    	}
-    
-    	resp = DeviceHealth.runActionServerScript(action_id, cache_id);
-    }*/
 
     if (resp.status != 200) {
 
@@ -238,124 +185,6 @@ DeviceHealth.executeActionServerScript = function executeActionServerScript(requ
 //------------------------------------------------
 // Static functions
 //------------------------------------------------
-
-/**
- * Runs the server script of an Action for a monitored device
- * 
- * @param {string} actionSysId - sys_id of the action
- * @param {string} metricSysId - sys_id of the metric cache
- * @returns {object} payload with the script execution result: status code, message code, and message
- */
-DeviceHealth.runActionServerScript = function runActionServerScript(actionSysId, metricSysId) {
-    var successMessage, errorMessage;
-
-    try {
-        if (!actionSysId || !metricSysId) {
-            errorMessage = gs.getMessage('Missing action or metric sys_id');
-
-            return DeviceHealth._handleActionServerScriptResponse(400, 'BAD_REQUEST', errorMessage, actionSysId, metricSysId);
-        }
-
-        // Retrieve the GlideRecord object of the Device Health Action
-        var grAction = new GlideRecord('x_mukl_dh_actions');
-        grAction.addQuery('sys_id', actionSysId);
-        grAction.addActiveQuery();
-        grAction.setLimit(1);
-        grAction.query();
-
-        if (!grAction.next()) {
-            errorMessage = gs.getMessage('Unable to find active Action record with given sys_id');
-
-            return DeviceHealth._handleActionServerScriptResponse(404, 'ACTION_NOT_FOUND', errorMessage, actionSysId, metricSysId);
-        }
-
-        // Retrieve the GlideRecord object of the Metric Cache
-        var grMetric = new GlideRecord('x_mukl_dh_metric_cache');
-
-        if (!grMetric.get(metricSysId)) {
-            errorMessage = gs.getMessage('Unable to find Metric record with given sys_id');
-
-            return DeviceHealth._handleActionServerScriptResponse(404, 'METRIC_NOT_FOUND', errorMessage, actionSysId, metricSysId);
-        }
-
-        // Retrieve the GlideRecord object of the Asset
-        var assetSysId = grMetric.getValue('asset');
-
-        if (!assetSysId) {
-            errorMessage = gs.getMessage('Metric record has no valid related asset');
-
-            return DeviceHealth._handleActionServerScriptResponse(500, 'ASSET_MISSING', errorMessage, actionSysId, metricSysId);
-        }
-
-        var grAsset = new GlideRecord('alm_asset');
-
-        if (!grAsset.get(assetSysId)) {
-            errorMessage = gs.getMessage('Unable to find Asset record from Metric record');
-
-            return DeviceHealth._handleActionServerScriptResponse(404, 'ASSET_NOT_FOUND', errorMessage, actionSysId, metricSysId);
-        }
-
-        // Run the server script of the Action
-        var GlideEval = new GlideScopedEvaluator();
-        GlideEval.putVariable('action', grAction);
-        GlideEval.putVariable('metric', grMetric);
-        GlideEval.putVariable('asset', grAsset);
-        GlideEval.putVariable('answer', true);
-        GlideEval.putVariable('message', null);
-
-        GlideEval.evaluateScript(grAction, 'server_script');
-
-        var answer = GlideEval.getVariable('answer');
-        var message = GlideEval.getVariable('message');
-
-        if (!answer) {
-            errorMessage = (message) ? gs.getMessage(message) : gs.getMessage('There was an issue executing the script');
-
-            return DeviceHealth._handleActionServerScriptResponse(500, 'SCRIPT_FAILED', errorMessage, actionSysId, metricSysId);
-        }
-
-        successMessage = (message) ? gs.getMessage(message) : gs.getMessage('The script executed successfully');
-
-        return DeviceHealth._handleActionServerScriptResponse(200, 'OK', successMessage, actionSysId, metricSysId);
-    } catch (e) {
-        errorMessage = gs.getMessage('An unexpected error occurred: {0}', e.message);
-
-        return DeviceHealth._handleActionServerScriptResponse(500, 'UNEXPECTED_ERROR', errorMessage, actionSysId, metricSysId);
-    }
-};
-
-/**
- * Handles the response of the execution of an Action server script
- * 
- * @param {integer} status - HTTP status code
- * @param {string} code - unique message ID
- * @param {string} message - short description of the script execution result
- * @param {string} actionSysId - sys_id of the action
- * @param {string} metricSysId - sys_id of the metric cache
- * @returns {object} payload with the script execution result: status code, message code, and message
- */
-DeviceHealth._handleActionServerScriptResponse = function _handleActionServerScriptResponse(status, code, message, actionSysId, metricSysId) {
-    var payload = {};
-    payload.status = status;
-    payload.code = code;
-
-    if (status == 200) {
-        payload.message = message;
-
-        DHMetricCache.cacheActionExecution({
-            sys_id: metricSysId,
-            action: actionSysId
-        });
-    } else {
-        payload.error = {};
-        payload.error.message = message;
-
-        gs.error('DeviceHealth.runActionServerScript failed: ' + message + '\nAction sys_id: ' + actionSysId + '\nMetric Cache sys_id: ' + metricSysId);
-    }
-
-    return payload;
-};
-
 
 /**
  * Sends notifications to users when their DEX score is 45 or lower
@@ -415,6 +244,47 @@ DeviceHealth.sendLowDexScoreNotifications = function sendLowDexScoreNotification
     }
 };
 
+DeviceHealth.aboutApplication = function aboutApplication() {
+    
+    var info = {};
+    
+    var sr = new GlideRecord('sys_scope');
+    sr.get('scope',gs.getCurrentScopeName());
+    
+    if ( sr.isValidRecord() ) {
+        info.app_name    = sr.name + '';
+        info.app_version = sr.version + '';
+    }
+    
+    sr = new GlideRecord('sys_scope');
+    sr.addQuery('scope','STARTSWITH','x_mukl_')
+      .addOrCondition('scope','STARTSWITH','x_teu_');
+    sr.orderBy('name');
+    sr.query();
+    
+    var apps  = [];
+    var count = 0;
+    
+    while ( sr.next() ) {
+        apps.push([sr.name,sr.scope,sr.version].join('\t'));
+        count += 1;
+    }
+    
+    var hdr = [
+        'ServiceNow instance: ' + gs.getProperty('instance_name'),
+        'Collection time: ' + new GlideDateTime(),
+        '',
+        'Application count: ' + count,
+        '',
+        'Name\tScope\tVersion'
+    ];
+    
+    info.all_app_versions = hdr.join('\n') +  apps.join('\n');
+    
+    return info;
+    
+};
+
 //------------------------------------------------
 // Prototype definition
 //------------------------------------------------
@@ -427,12 +297,6 @@ DeviceHealth.prototype = {
     ),
 
     type: 'DeviceHealth',
-};
-
-DeviceHealth.prototype.getDH = function getDH() {
-    var api = new DHAPI();
-    this.api = api;
-    return api;
 };
 
 //------------------------------------------------
@@ -449,78 +313,6 @@ DeviceHealth.prototype.getUser = function getUser() {
 
 DeviceHealth.prototype.getUserId = function getUserId() {
     return this.getUser().getId();
-};
-
-DeviceHealth.prototype.getDexScore = function getDexScore() {
-    var resp = this.api.dex_scores;
-    if (!resp || !resp.data || !resp.data.length) {
-        return 'No DEX score available';
-    }
-
-    var dat = '2000-01-01',
-        dex;
-
-    resp.data.forEach(function(d) {
-        if (d.date < dat) {
-            return;
-        }
-        dat = d.date;
-        dex = d;
-    });
-
-    return dex;
-};
-
-DeviceHealth.prototype.getDeviceRatings = function getDeviceRatings() {
-
-    this.loadMetrics();
-
-    var device_names = this.getDeviceNames();
-    var ratings = [];
-
-    device_names.forEach(function(device_name) {
-        var device = this.getDevice(device_name);
-        var item = {
-            name: device_name,
-            rating: device.getOverallScore(),
-        };
-        if (item.rating) {
-            ratings.push(item);
-        }
-    }, this);
-
-    return ratings;
-};
-
-DeviceHealth.prototype.getReport = function getReport() {
-    var log = [];
-
-    var info = this.getDexScore();
-    log.push(
-        'Your overall DEX score is ' + info.dex_score + ' (on ' + info.date + ')'
-    );
-    log.push('');
-
-    var devs = this.getDeviceRatings();
-
-    if (!devs || devs.length == 0) {
-        log.push('You have no devices with ratings');
-    } else if (devs.length == 1) {
-        log.push('You have one device with ratings');
-    } else {
-        log.push('You have ' + devs.length + ' devices with ratings');
-    }
-
-    devs.forEach(function(d) {
-        log.push('\t' + d.name + '\t[' + d.rating + ']');
-    });
-    log.push('');
-
-    devs.forEach(function(d) {
-        this.getDevice(d.name).getReport(log);
-    }, this);
-
-    return log.join('\n');
 };
 
 DeviceHealth.prototype.getDeviceNames = function getDeviceNames() {
@@ -548,9 +340,12 @@ DeviceHealth.prototype.getDevice = function getDevice(device_name) {
  * @returns {ActionHistoryObj[]}
  */
 DeviceHealth.prototype.getActionHistory = function getActionHistory() {
+    
+    var DEX_SCORE_DAYS = parseInt(gs.getProperty('x_mukl_dh.dex.days.shown', 7));
+    
     /**@type {ActionHistoryObj[]} */
     const act_hist = new global.GlideQuery('x_mukl_dh_action_history')
-        .where('splog_sys_created_on', '>=', gs.daysAgoStart(DHAPI.DEXSCOREDAYS))
+        .where('splog_sys_created_on', '>=', gs.daysAgoStart(DEX_SCORE_DAYS))
         .where('splog_sys_created_on', '<=', gs.daysAgoEnd(0))
         .where('action_type', 'remote_action')
         .where('metric_asset.assigned_to', this.getUserId())
@@ -634,7 +429,7 @@ DeviceHealth.prototype.getMetricFieldLabelMaps =
 
         fieldNames.forEach(
             (fieldName) =>
-            (fields[fieldName] = grMetricCache.getElement(fieldName).getLabel())
+                (fields[fieldName] = grMetricCache.getElement(fieldName).getLabel())
         );
 
         return fields;
@@ -681,38 +476,6 @@ DeviceHealth.prototype.getRatingFieldsNames = function getRatingFieldsNames() {
 // Original methods
 //------------------------------------------------
 
-DeviceHealth.prototype.loadMetrics = function loadMetrics(names) {
-
-    var device_names = this.getDeviceNames();
-
-    // Use supplied device name(s), if present
-    if (names) {
-        device_names = Array.isArray(names) ? names : [names];
-    }
-
-    var metrics = this.api.getDeviceMetrics(null, device_names);
-
-    // Nothing to do if we have not received a valid array
-    if (!Array.isArray(metrics.data)) {
-        return;
-    }
-
-    // Process each returned metric data item
-    metrics.data.forEach(function(dev) {
-
-        var device = this.getDevice(dev.device_name);
-
-        // Ignore items with no device i.e. not known to NextThink
-        if (!device) {
-            return;
-        }
-
-        device.setMetrics(dev, this.labels);
-
-    }, this);
-
-};
-
 /*
 	@name             AIUserData
 	@description      End point designed to be used for returning all a users context. This would allow full visibility of the users metrics and available actions to be performed.
@@ -734,14 +497,14 @@ DeviceHealth.prototype.AIUserData = function AIUserData() {
         <sys_created_on>2026-07-20 13:44:20</sys_created_on>
         <sys_customer_update>false</sys_customer_update>
         <sys_id>9569bc4c9392cf506214fe327cba1004</sys_id>
-        <sys_mod_count>8</sys_mod_count>
+        <sys_mod_count>12</sys_mod_count>
         <sys_name>DeviceHealth</sys_name>
         <sys_package display_value="VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
-        <sys_policy/>
+        <sys_policy>read</sys_policy>
         <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sys_script_include_9569bc4c9392cf506214fe327cba1004</sys_update_name>
-        <sys_updated_by>peter.watt</sys_updated_by>
-        <sys_updated_on>2026-08-03 11:01:06</sys_updated_on>
+        <sys_updated_by>huw.nolan</sys_updated_by>
+        <sys_updated_on>2026-08-14 08:38:43</sys_updated_on>
     </sys_script_include>
 </record_update>
