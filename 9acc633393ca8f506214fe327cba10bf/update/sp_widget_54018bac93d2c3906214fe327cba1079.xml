@@ -155,7 +155,7 @@
         <name>DH Device Actions</name>
         <option_schema/>
         <public>false</public>
-        <roles/>
+        <roles>x_mukl_dh.actions_user</roles>
         <script><![CDATA[(function () {
 		
 	data.ra_message_title = gs.getMessage('dh.action.remote.one_time.title');
@@ -176,7 +176,7 @@
         <sys_created_on>2026-07-22 12:53:46</sys_created_on>
         <sys_customer_update>false</sys_customer_update>
         <sys_id>54018bac93d2c3906214fe327cba1079</sys_id>
-        <sys_mod_count>9</sys_mod_count>
+        <sys_mod_count>10</sys_mod_count>
         <sys_name>DH Device Actions</sys_name>
         <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy/>
@@ -184,7 +184,7 @@
         <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sp_widget_54018bac93d2c3906214fe327cba1079</sys_update_name>
         <sys_updated_by>peter.watt</sys_updated_by>
-        <sys_updated_on>2026-08-03 14:46:08</sys_updated_on>
+        <sys_updated_on>2026-09-10 16:10:15</sys_updated_on>
         <template><![CDATA[<div class="panel panel-body">
   <div id="dh-container">
     <div class="header-text">

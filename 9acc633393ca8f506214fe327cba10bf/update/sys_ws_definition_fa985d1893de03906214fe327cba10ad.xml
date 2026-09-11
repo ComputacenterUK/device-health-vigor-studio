@@ -6,7 +6,7 @@
         <consumes_customized>false</consumes_customized>
         <default_version>No active default version</default_version>
         <doc_link/>
-        <enforce_acl>cf9d01d3e73003009d6247e603f6a990</enforce_acl>
+        <enforce_acl>8e9fcdbc939b8310494dba584dba1030</enforce_acl>
         <is_versioned>false</is_versioned>
         <name>DH API</name>
         <namespace>x_mukl_dh</namespace>
@@ -19,7 +19,7 @@
         <sys_created_on>2026-07-21 10:39:32</sys_created_on>
         <sys_customer_update>false</sys_customer_update>
         <sys_id>fa985d1893de03906214fe327cba10ad</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>1</sys_mod_count>
         <sys_name>DH API</sys_name>
         <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy>read</sys_policy>
@@ -27,6 +27,6 @@
         <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sys_ws_definition_fa985d1893de03906214fe327cba10ad</sys_update_name>
         <sys_updated_by>peter.watt</sys_updated_by>
-        <sys_updated_on>2026-07-21 10:39:32</sys_updated_on>
+        <sys_updated_on>2026-09-10 16:20:47</sys_updated_on>
     </sys_ws_definition>
 </record_update>

@@ -316,7 +316,7 @@
         <name>DH Grid Item</name>
         <option_schema>[{"hint":"Should the chart show a range from red to green, or a single color signifying the overall score?","name":"use_multicolor_chart","section":"Presentation","label":"Use Multicolor Chart","type":"boolean"}]</option_schema>
         <public>false</public>
-        <roles/>
+        <roles>x_mukl_dh.actions_user</roles>
         <script><![CDATA[(function() {
   
   var dh = new DeviceHealth();
@@ -331,7 +331,7 @@
         <sys_created_on>2026-07-22 12:56:02</sys_created_on>
         <sys_customer_update>false</sys_customer_update>
         <sys_id>99814fec93d2c3906214fe327cba1080</sys_id>
-        <sys_mod_count>3</sys_mod_count>
+        <sys_mod_count>4</sys_mod_count>
         <sys_name>DH Grid Item</sys_name>
         <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy/>
@@ -339,7 +339,7 @@
         <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sp_widget_99814fec93d2c3906214fe327cba1080</sys_update_name>
         <sys_updated_by>peter.watt</sys_updated_by>
-        <sys_updated_on>2026-07-28 09:55:50</sys_updated_on>
+        <sys_updated_on>2026-09-10 16:11:08</sys_updated_on>
         <template><![CDATA[<div>
   <div ng-if="c.options.developer_mode == 'true'"> <!-- Testing stuff -->
     <div class="checkbox"><label><input type="checkbox" ng-model="c.hasDevices" ng-change="c.updateGraph(c.score)">Has devices?</label></div>

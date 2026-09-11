@@ -15,10 +15,10 @@
         <element dependent="related_table" dependent_on_field="related_table" label="Related item" max_length="32" name="related_item" type="document_id" use_dependent_field="true"/>
         <element label="Floating Point Number value" max_length="40" name="fpn_value" type="float"/>
         <element label="Parent" max_length="32" name="parent" reference="x_mukl_dh_metric_cache" type="reference"/>
-        <element attributes="edge_encryption_enabled=true" label="Device name" max_length="100" name="device_name" read_only="true" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Device name" max_length="100" name="device_name" type="string"/>
         <element default="javascript: new GlideDate();" label="Date" max_length="40" name="date" type="glide_date"/>
         <element attributes="no_sort=true,slushbucket_ref_no_expand=true" label="Remote Actions Run Today" max_length="1024" name="ra_run_today" reference="x_mukl_dh_actions" type="glide_list"/>
-        <element attributes="edge_encryption_enabled=true" label="UID" max_length="255" name="uid" read_only="true" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="UID" max_length="255" name="uid" type="string"/>
         <element label="Asset" max_length="32" name="asset" reference="alm_asset" type="reference"/>
         <element choice="1" label="Overall Score" max_length="40" name="overall_score" type="choice">
             <choice>

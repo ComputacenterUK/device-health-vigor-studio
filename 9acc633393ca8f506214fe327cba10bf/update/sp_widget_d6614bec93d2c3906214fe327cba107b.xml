@@ -147,7 +147,7 @@
         <name>DH Device Picker</name>
         <option_schema/>
         <public>false</public>
-        <roles/>
+        <roles>x_mukl_dh.actions_user</roles>
         <script><![CDATA[(function () {
    
   data.selectedDevice = input?.asset_id || options?.asset_id || $sp.getParameter("asset_id");
@@ -160,7 +160,7 @@
         <sys_created_on>2026-07-22 12:55:33</sys_created_on>
         <sys_customer_update>false</sys_customer_update>
         <sys_id>d6614bec93d2c3906214fe327cba107b</sys_id>
-        <sys_mod_count>13</sys_mod_count>
+        <sys_mod_count>14</sys_mod_count>
         <sys_name>DH Device Picker</sys_name>
         <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy/>
@@ -168,7 +168,7 @@
         <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sp_widget_d6614bec93d2c3906214fe327cba107b</sys_update_name>
         <sys_updated_by>peter.watt</sys_updated_by>
-        <sys_updated_on>2026-08-03 14:45:22</sys_updated_on>
+        <sys_updated_on>2026-09-10 16:10:35</sys_updated_on>
         <template><![CDATA[<div class="panel panel-body">
   <div id="dh-container">
     <div class="header-text">

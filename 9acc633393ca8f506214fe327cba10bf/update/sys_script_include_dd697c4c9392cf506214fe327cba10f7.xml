@@ -141,12 +141,13 @@ dhCache.prototype.getInstanceData = function getInstanceData(instance) {
     cr.query();
 
     result.query = cr.getEncodedQuery() + '';
-    result.count = cr.getRowCount();
+    result.count = 0;
 
     var map = entity.getMetricMap();
     var day;
 
     while (cr.next()) {
+		result.count++;
 
         if (instance.type == 'dhDevice') {
 
@@ -347,7 +348,7 @@ dhCache.prototype.get_actions = function get_actions(gr, condition, actionArr) {
         <sys_created_on>2026-07-20 13:44:20</sys_created_on>
         <sys_customer_update>false</sys_customer_update>
         <sys_id>dd697c4c9392cf506214fe327cba10f7</sys_id>
-        <sys_mod_count>39</sys_mod_count>
+        <sys_mod_count>40</sys_mod_count>
         <sys_name>dhCache</sys_name>
         <sys_package display_value="Computacenter VIGOR" source="x_mukl_dh">9acc633393ca8f506214fe327cba10bf</sys_package>
         <sys_policy>read</sys_policy>
@@ -355,6 +356,6 @@ dhCache.prototype.get_actions = function get_actions(gr, condition, actionArr) {
         <sys_scope display_value="Computacenter VIGOR">9acc633393ca8f506214fe327cba10bf</sys_scope>
         <sys_update_name>sys_script_include_dd697c4c9392cf506214fe327cba10f7</sys_update_name>
         <sys_updated_by>peter.watt</sys_updated_by>
-        <sys_updated_on>2026-08-11 15:45:44</sys_updated_on>
+        <sys_updated_on>2026-09-10 15:51:35</sys_updated_on>
     </sys_script_include>
 </record_update>
